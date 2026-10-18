@@ -1,0 +1,46 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import progress %}
+{% block tab %}
+<div class="grid g4" style="margin-bottom:1.25rem;">
+  <div class="stat"><div class="ico">{{ icon('book', 21) }}</div><div><div class="num">{{ s.mat_pct|round|int }}%</div><div class="lbl">Progres materi</div></div></div>
+  <div class="stat"><div class="ico leaf">{{ icon('award', 21) }}</div><div><div class="num">{{ s.avg|num if s.avg is not none else '-' }}</div><div class="lbl">Rata-rata nilai (%)</div></div></div>
+  <div class="stat"><div class="ico blue">{{ icon('attendance', 21) }}</div><div><div class="num">{{ s.att_pct|round|int if s.att_pct is not none else '-' }}{{ '%' if s.att_pct is not none }}</div><div class="lbl">Kehadiran</div></div></div>
+  <div class="stat"><div class="ico amber">{{ icon('task', 21) }}</div><div><div class="num">{{ s.assignments|selectattr('submission_id')|list|length }}/{{ s.assignments|length }}</div><div class="lbl">Tugas dikumpulkan</div></div></div>
+</div>
+<div class="split">
+  <div class="stack">
+    <section class="card flush">
+      <div class="card-head"><h2>Nilai tugas</h2></div>
+      {% if s.assignments %}<div class="table-wrap"><table class="table">
+        <thead><tr><th>Tugas</th><th>Status</th><th class="num">Nilai</th><th>Umpan balik</th></tr></thead>
+        <tbody>{% for a in s.assignments %}
+          {% set st = a.sub_status if a.submission_id else ('terlambat' if is_past(a.deadline) else 'belum') %}
+          <tr><td><a href="{{ url_for('student.assignment', cid=cls.class_id, aid=a.assignment_id) }}">{{ a.title }}</a></td><td>{{ badge(st) }}</td>
+            <td class="num">{% if a.score is not none %}<strong>{{ a.score|num }}</strong><span class="muted"> / {{ a.max_score|num }}</span>{% else %}-{% endif %}</td>
+            <td class="muted small">{{ a.feedback or '-' }}</td></tr>{% endfor %}</tbody></table></div>
+      {% else %}<div class="card-pad muted">Belum ada tugas.</div>{% endif %}
+    </section>
+    <section class="card flush">
+      <div class="card-head"><h2>Nilai kuis</h2></div>
+      {% if s.quizzes %}<div class="table-wrap"><table class="table">
+        <thead><tr><th>Kuis</th><th class="num">Percobaan</th><th class="num">Nilai terbaik</th></tr></thead>
+        <tbody>{% for z in s.quizzes %}
+          <tr><td><a href="{{ url_for('student.quiz', cid=cls.class_id, qid=z.quiz_id) }}">{{ z.title }}</a></td><td class="num">{{ z.attempts }}</td>
+            <td class="num">{% if z.best is not none %}<strong>{{ z.best|num }}</strong><span class="muted"> / {{ z.max_score|num }}</span>{% elif z.pending %}{{ badge('menunggu') }}{% else %}-{% endif %}</td></tr>{% endfor %}</tbody></table></div>
+      {% else %}<div class="card-pad muted">Belum ada kuis.</div>{% endif %}
+    </section>
+  </div>
+  <section class="card">
+    <h2 style="margin-bottom:1rem;">Progres materi</h2>
+    <div class="stack" style="gap:.9rem;">
+      {% for m in mats %}
+      <div class="row" style="flex-wrap:nowrap;">
+        <span class="ico-dot" style="color:{{ 'var(--sprout)' if m.done else 'var(--ink-3)' }}">{{ icon('check-circle' if m.done else ('lock' if m.locked else 'circle-dot'), 18) }}</span>
+        <span style="flex:1;min-width:0;{{ 'color:var(--ink-3)' if not m.done }}">{{ m.title }}</span>
+      </div>
+      {% else %}<p class="muted">Belum ada materi.</p>{% endfor %}
+    </div>
+    <hr>{{ progress(s.mat_pct) }}
+  </section>
+</div>
+{% endblock %}

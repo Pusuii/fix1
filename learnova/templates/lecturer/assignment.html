@@ -1,0 +1,40 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, deadline, confirm_btn %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('lecturer.assignments', cid=cls.class_id) }}">Tugas</a> {{ icon('chevron-right', 14) }} <span>{{ a.title }}</span></div>
+<div class="card" style="margin-bottom:1.25rem;">
+  <div class="row between"><h2 style="font-size:1.4rem;">{{ a.title }}</h2>
+    <div class="row"><a class="btn sm" href="{{ url_for('lecturer.assignment_edit', cid=cls.class_id, aid=a.assignment_id) }}">{{ icon('edit', 14) }} Ubah</a>
+      {{ confirm_btn('Hapus', url_for('lecturer.assignment_delete', cid=cls.class_id, aid=a.assignment_id), 'Hapus tugas ini beserta semua pengumpulan dan nilainya?') }}</div></div>
+  <p class="prose" style="margin:.8rem 0;">{{ a.instructions or 'Tanpa instruksi.' }}</p>
+  <div class="row" style="gap:1.5rem;"><span>{{ deadline(a.deadline, done=True) }}{% if late %} <span class="badge badge-mute">Ditutup</span>{% endif %}</span><span class="deadline">{{ icon('award', 15) }} Nilai maks. {{ a.max_score|num }}</span></div>
+</div>
+<h2 style="margin-bottom:.8rem;">Pengumpulan mahasiswa</h2>
+<div class="card flush">
+  {% if rows %}
+  <div class="list">
+  {% for r in rows %}
+    <div class="list-row" id="s{{ r.submission_id }}" style="align-items:flex-start;flex-wrap:wrap;">
+      <div class="avatar sm">{{ r.full_name|initials }}</div>
+      <div class="body" style="min-width:200px;">
+        <strong>{{ r.full_name }}</strong>
+        {% if r.submission_id %}
+          <span>Dikirim {{ r.submitted_at|dt }}{% if r.submitted_at > a.deadline %} · <span style="color:var(--red);font-weight:600;">setelah tenggat</span>{% endif %}</span>
+          <div style="margin-top:.35rem;"><a href="{{ url_for('download', filename=r.file_url) }}" target="_blank">{{ icon('file', 14) }} {{ r.file_url|filename }}</a> · <a href="{{ url_for('download', filename=r.file_url, dl=1) }}">Unduh</a></div>
+        {% else %}<span>Belum mengumpulkan</span>{% endif %}
+      </div>
+      {% if r.submission_id %}
+      <form method="post" action="{{ url_for('lecturer.assignment_grade', cid=cls.class_id, aid=a.assignment_id, sid=r.submission_id) }}" class="row" style="flex:1;min-width:320px;justify-content:flex-end;align-items:flex-start;">
+        {{ csrf_input() }}
+        <div style="width:96px;"><label class="sr-only" for="sc{{ r.submission_id }}">Nilai</label><input class="input" id="sc{{ r.submission_id }}" name="score" type="number" min="0" max="{{ a.max_score }}" step="any" value="{{ r.score|num if r.score is not none else '' }}" placeholder="Nilai" required></div>
+        <div style="flex:1;min-width:170px;"><label class="sr-only" for="fb{{ r.submission_id }}">Umpan balik</label><input class="input" id="fb{{ r.submission_id }}" name="feedback" maxlength="1000" value="{{ r.feedback or '' }}" placeholder="Umpan balik"></div>
+        <button class="btn sm {{ 'primary' if r.status != 'dinilai' }}" type="submit" style="margin-top:.35rem;">{{ 'Perbarui' if r.status == 'dinilai' else 'Simpan nilai' }}</button>
+      </form>
+      {{ badge(r.status) }}
+      {% else %}{{ badge('terlambat' if late else 'belum') }}{% endif %}
+    </div>
+  {% endfor %}
+  </div>
+  {% else %}{% call empty('users', 'Belum ada peserta kelas') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

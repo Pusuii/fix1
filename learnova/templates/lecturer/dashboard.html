@@ -1,0 +1,58 @@
+{% extends "app.html" %}
+{% from "_macros.html" import stat, empty %}
+{% block title %}Beranda · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Halo, {{ me.full_name.split()[0] }}</h1><p>Ringkasan kelas yang Anda ampu dan pekerjaan yang menunggu penilaian.</p></div>
+  <div class="actions">{% if has_perm('class.manage') %}<a class="btn primary" href="{{ url_for('lecturer.class_new') }}">{{ icon('plus', 17) }} Kelas baru</a>{% endif %}</div>
+</div>
+
+{% for o in open_sessions %}
+<div class="alert alert-success" style="align-items:center;margin-bottom:.8rem;">
+  <i class="pulse"></i><div style="flex:1;"><strong>Absensi sedang dibuka:</strong> {{ o.class_name }} · {{ o.topic }}</div>
+  <a class="btn sm" href="{{ url_for('lecturer.session_detail', cid=o.class_id, sid=o.session_id) }}">Pantau</a>
+</div>
+{% endfor %}
+
+<div class="grid g4">
+  {{ stat('book', active|length, 'Kelas aktif') }}
+  {{ stat('users', total_students, 'Mahasiswa diampu', 'blue') }}
+  {{ stat('task', to_grade|length, 'Tugas perlu dinilai', 'amber') }}
+  {{ stat('quiz', essay_pending, 'Jawaban esai perlu dinilai', 'red') }}
+</div>
+
+<div class="split section">
+  <div>
+    <div class="section-head"><h2>Kelas saya</h2>{% if has_perm('class.manage') %}<a href="{{ url_for('lecturer.classes') }}">Kelola semua</a>{% endif %}</div>
+    {% if classes %}
+    <div class="grid g2">
+      {% for c in classes[:6] %}
+      <a class="card class-card" href="{{ url_for('lecturer.class_home', cid=c.class_id) }}">
+        <div class="row between"><span class="code">{{ c.course_code }}</span>{{ badge(c.status) }}</div>
+        <div><h3>{{ c.class_name }}</h3><div class="muted small">{{ c.course_name }}</div></div>
+        <div class="meta"><span>{{ icon('users', 15) }} {{ c.students }} mahasiswa</span><span>{{ icon('calendar', 15) }} {{ c.semester }} {{ c.academic_year }}</span></div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">{% call empty('book', 'Belum ada kelas', 'Buat kelas pertama Anda untuk mulai menambahkan materi dan tugas.') %}<a class="btn primary" href="{{ url_for('lecturer.class_new') }}">Buat kelas</a>{% endcall %}</div>
+    {% endif %}
+  </div>
+  <div>
+    <div class="section-head"><h2>Perlu dinilai</h2></div>
+    <div class="card flush">
+      {% if to_grade %}
+      <div class="list">
+        {% for s in to_grade[:6] %}
+        <a class="list-row" href="{{ url_for('lecturer.assignment', cid=s.class_id, aid=s.assignment_id) }}#s{{ s.submission_id }}">
+          <div class="avatar sm">{{ s.full_name|initials }}</div>
+          <div class="body"><strong>{{ s.full_name }}</strong><span>{{ s.title }} · {{ s.submitted_at|rel }}</span></div>
+        </a>
+        {% endfor %}
+      </div>
+      {% if to_grade|length > 6 %}<div class="card-pad muted small">dan {{ to_grade|length - 6 }} pengumpulan lainnya.</div>{% endif %}
+      {% else %}{% call empty('check-circle', 'Semua sudah dinilai', 'Pengumpulan tugas baru akan muncul di sini.') %}{% endcall %}{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

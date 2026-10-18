@@ -1,0 +1,23 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, deadline %}
+{% block tab %}
+<div class="row between" style="margin-bottom:1rem;">
+  <p class="muted" style="margin:0;">Tugas langsung terlihat oleh mahasiswa setelah dibuat.</p>
+  <a class="btn primary" href="{{ url_for('lecturer.assignment_new', cid=cls.class_id) }}">{{ icon('plus', 17) }} Buat tugas</a>
+</div>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Tugas</th><th>Tenggat</th><th class="num">Terkumpul</th><th class="num">Dinilai</th><th></th></tr></thead>
+    <tbody>{% for a in rows %}
+      <tr>
+        <td><a href="{{ url_for('lecturer.assignment', cid=cls.class_id, aid=a.assignment_id) }}"><strong>{{ a.title }}</strong></a><div class="muted small">Nilai maks. {{ a.max_score|num }}</div></td>
+        <td>{{ deadline(a.deadline, done=True) }}{% if is_past(a.deadline) %} <span class="badge badge-mute">Ditutup</span>{% endif %}</td>
+        <td class="num">{{ a.submitted }}/{{ total }}</td>
+        <td class="num">{{ a.graded }}/{{ a.submitted }}</td>
+        <td class="actions"><a class="btn sm" href="{{ url_for('lecturer.assignment', cid=cls.class_id, aid=a.assignment_id) }}">Periksa</a></td>
+      </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{% call empty('task', 'Belum ada tugas', 'Buat tugas pertama dengan tenggat dan nilai maksimum.') %}<a class="btn primary" href="{{ url_for('lecturer.assignment_new', cid=cls.class_id) }}">Buat tugas</a>{% endcall %}{% endif %}
+</div>
+{% endblock %}

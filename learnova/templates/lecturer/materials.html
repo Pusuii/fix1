@@ -1,0 +1,30 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, confirm_btn %}
+{% block tab %}
+<div class="row between" style="margin-bottom:1rem;">
+  <p class="muted" style="margin:0;">Urutan dan prasyarat menentukan kapan materi terbuka bagi mahasiswa.</p>
+  <a class="btn primary" href="{{ url_for('lecturer.material_new', cid=cls.class_id) }}">{{ icon('plus', 17) }} Tambah materi</a>
+</div>
+<div class="card flush">
+  {% if mats %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Urutan</th><th>Materi</th><th>Jenis</th><th>Prasyarat</th><th class="num">Selesai</th><th></th></tr></thead>
+    <tbody>
+    {% for m in mats %}
+      <tr>
+        <td class="mono">{{ m.sequence_no }}</td>
+        <td><strong>{{ m.title }}</strong>{% if m.file_url %}<div class="muted small">{{ icon('link' if is_external(m.file_url) else 'file', 13) }} {{ m.file_url|filename|truncate(48) }}</div>{% endif %}</td>
+        <td><span class="badge badge-brand">{{ m.material_type|capitalize }}</span></td>
+        <td>{{ m.prereq_title or '-' }}</td>
+        <td class="num">{{ m.completed }}/{{ total_students }}</td>
+        <td class="actions">
+          <a class="btn sm" href="{{ url_for('lecturer.material_edit', cid=cls.class_id, mid=m.material_id) }}">{{ icon('edit', 14) }} Ubah</a>
+          {{ confirm_btn('Hapus', url_for('lecturer.material_delete', cid=cls.class_id, mid=m.material_id), 'Hapus materi "' ~ m.title ~ '"? Progres mahasiswa untuk materi ini ikut terhapus.') }}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}{% call empty('book', 'Belum ada materi', 'Tambahkan materi pertama untuk kelas ini.') %}<a class="btn primary" href="{{ url_for('lecturer.material_new', cid=cls.class_id) }}">Tambah materi</a>{% endcall %}{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, deadline %}
+{% block tab %}
+<div class="card flush">
+  {% if items %}
+  <div class="list">
+    {% for it in items %}
+    <a class="list-row" href="{{ url_for('student.assignment', cid=cls.class_id, aid=it.a.assignment_id) }}">
+      <div class="ico {{ 'done' if it.state == 'dinilai' }}">{{ icon('task', 19) }}</div>
+      <div class="body"><strong>{{ it.a.title }}</strong>{{ deadline(it.a.deadline, done=it.a.submission_id is not none) }}</div>
+      {% if it.a.score is not none %}<strong class="mono">{{ it.a.score|num }}<span class="muted">/{{ it.a.max_score|num }}</span></strong>{% endif %}
+      {{ badge(it.state) }}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}{% call empty('task', 'Belum ada tugas', 'Tugas akan muncul di sini setelah dosen membuatnya.') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

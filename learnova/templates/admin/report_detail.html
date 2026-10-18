@@ -1,0 +1,27 @@
+{% extends "app.html" %}
+{% from "_macros.html" import select %}
+{% block title %}Laporan #{{ r.report_id }} · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ url_for('admin.reports') }}">Laporan kendala</a> {{ icon('chevron-right', 14) }} <span>#{{ r.report_id }}</span></div>
+<div class="page-head"><div><h1 style="font-size:1.6rem;">{{ r.subject }}</h1><p>Dari {{ r.full_name }} ({{ role_labels[r.role_name] }}) · {{ r.created_at|dt }}</p></div><div class="actions">{{ badge(r.status) }}</div></div>
+<div class="split">
+  <section class="card">
+    <h3 style="margin-bottom:.6rem;">Isi laporan</h3>
+    <p class="prose">{{ r.description }}</p>
+    <hr>
+    <dl class="kv"><dt>Pelapor</dt><dd>{{ r.full_name }} · {{ r.email }}</dd><dt>Ditangani oleh</dt><dd>{{ r.handler or 'Belum ada' }}</dd></dl>
+  </section>
+  <section class="card">
+    <h3 style="margin-bottom:1rem;">Tindak lanjut</h3>
+    <form method="post">
+      {{ csrf_input() }}
+      {{ select('Status laporan', 'status', statuses, r.status, errors.status, required=True) }}
+      <div class="field {{ 'has-error' if errors.response }}"><label for="f-response">Tanggapan untuk pelapor</label>
+        <textarea class="textarea" id="f-response" name="response" rows="5" maxlength="1000">{{ request.form.get('response', r.response or '') }}</textarea>
+        <div class="hint">Tanggapan tampil di halaman Bantuan pelapor. Wajib diisi saat menandai selesai.</div>
+        {% if errors.response %}<div class="err">{{ errors.response }}</div>{% endif %}</div>
+      <button class="btn primary" type="submit">Simpan tindak lanjut</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

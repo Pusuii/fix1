@@ -1,0 +1,28 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import field, textarea, select %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('lecturer.materials', cid=cls.class_id) }}">Materi</a> {{ icon('chevron-right', 14) }} <span>{{ 'Ubah materi' if m else 'Materi baru' }}</span></div>
+<form class="card" method="post" enctype="multipart/form-data" style="max-width:760px;">
+  {{ csrf_input() }}
+  <h2 style="margin-bottom:1.1rem;">{{ 'Ubah materi' if m else 'Materi baru' }}</h2>
+  <div class="form-grid">
+    <div class="full">{{ field('Judul materi', 'title', form.title, error=errors.title, required=True) }}</div>
+    <div class="full">{{ textarea('Deskripsi', 'description', form.description, rows=3, hint='Ringkasan singkat yang tampil di daftar materi.') }}</div>
+    {{ select('Jenis materi', 'material_type', types, form.material_type, errors.material_type, required=True) }}
+    {{ field('Urutan', 'sequence_no', form.sequence_no, 'number', errors.sequence_no, required=True, extra='min="1"') }}
+    <div class="full">{{ select('Prasyarat', 'prerequisite_id', others|map(attribute='material_id')|zip(others|map(attribute='title'))|list, form.prerequisite_id, errors.prerequisite_id, hint='Materi ini terbuka setelah mahasiswa menyelesaikan materi prasyarat.', blank='Tanpa prasyarat') }}</div>
+    <div class="full">
+      <div class="field {{ 'has-error' if errors.file }}">
+        <label for="f-file">Berkas materi</label>
+        <input class="input" id="f-file" type="file" name="file">
+        {% if m and m.file_url and not is_external(m.file_url) %}<div class="hint">Berkas saat ini: <strong>{{ m.file_url|filename }}</strong>. Pilih berkas baru untuk menggantinya.</div>
+          <label class="check" style="margin-top:.4rem;"><input type="checkbox" name="remove_file" value="1"> <span class="small">Hapus lampiran saat ini</span></label>
+        {% else %}<div class="hint">Maksimum {{ max_mb }} MB (PDF, dokumen, slide, gambar, arsip, video).</div>{% endif %}
+        {% if errors.file %}<div class="err">{{ errors.file }}</div>{% endif %}
+      </div>
+    </div>
+    <div class="full">{{ field('atau tautan', 'link', form.link, 'url', errors.link, hint='Gunakan untuk video atau bacaan di luar Learnova. Bila berkas juga dipilih, berkas yang dipakai.', placeholder='https://') }}</div>
+  </div>
+  <div class="form-actions"><button class="btn primary" type="submit">{{ 'Simpan perubahan' if m else 'Simpan materi' }}</button><a class="btn" href="{{ url_for('lecturer.materials', cid=cls.class_id) }}">Batal</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty %}
+{% block tab %}
+{% for s in open_sessions %}
+<div class="alert alert-success" style="align-items:center;margin-bottom:1rem;">
+  <i class="pulse"></i><div style="flex:1;"><strong>Absensi dibuka:</strong> {{ s.topic }}</div>
+  <a class="btn sm" href="{{ url_for('lecturer.session_detail', cid=cls.class_id, sid=s.session_id) }}">Pantau</a>
+</div>
+{% endfor %}
+<div class="grid g4">
+  <div class="stat"><div class="ico blue">{{ icon('users', 21) }}</div><div><div class="num">{{ stats.students }}</div><div class="lbl">Mahasiswa aktif</div></div></div>
+  <a class="stat" style="text-decoration:none;color:inherit;" href="{{ url_for('lecturer.materials', cid=cls.class_id) }}"><div class="ico">{{ icon('book', 21) }}</div><div><div class="num">{{ counts.materi }}</div><div class="lbl">Materi</div></div></a>
+  <a class="stat" style="text-decoration:none;color:inherit;" href="{{ url_for('lecturer.assignments', cid=cls.class_id) }}"><div class="ico amber">{{ icon('task', 21) }}</div><div><div class="num">{{ stats.submissions_pending }}</div><div class="lbl">Tugas perlu dinilai</div></div></a>
+  <a class="stat" style="text-decoration:none;color:inherit;" href="{{ url_for('lecturer.quizzes', cid=cls.class_id) }}"><div class="ico red">{{ icon('quiz', 21) }}</div><div><div class="num">{{ stats.essay_pending }}</div><div class="lbl">Esai perlu dinilai</div></div></a>
+</div>
+<div class="section">
+  <div class="section-head"><h2>Peserta kelas</h2><div class="row"><a class="btn sm" href="{{ url_for('lecturer.class_edit', cid=cls.class_id) }}">{{ icon('edit', 15) }} Ubah kelas</a></div></div>
+  <div class="card flush">
+    {% if students %}
+    <div class="table-wrap"><table class="table">
+      <thead><tr><th>Nama</th><th>Email</th><th>Bergabung</th></tr></thead>
+      <tbody>{% for s in students %}<tr>
+        <td><div class="cell-user"><div class="avatar sm">{{ s.full_name|initials }}</div><strong>{{ s.full_name }}</strong></div></td>
+        <td>{{ s.email }}</td><td>{{ s.enrolled_at|dateid }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% else %}{% call empty('users', 'Belum ada peserta', 'Mahasiswa bergabung dari menu Kelas, atau admin dapat mendaftarkan mereka.') %}{% endcall %}{% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "app.html" %}
+{% block title %}Role & hak akses · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Role &amp; hak akses</h1><p>Tentukan apa yang boleh dilakukan setiap peran. Perubahan berlaku pada permintaan berikutnya dan tercatat di audit log.</p></div></div>
+<div class="pill-tabs" style="margin-bottom:1.25rem;">
+  {% for r in roles %}<a href="{{ url_for('superadmin.permissions', role=r.role_name) }}" class="{{ 'active' if r.role_name == role.role_name }}">{{ role_labels[r.role_name] }}</a>{% endfor %}
+</div>
+<form method="post" class="card">
+  {{ csrf_input() }}<input type="hidden" name="role" value="{{ role.role_name }}">
+  <div class="row between" style="margin-bottom:1rem;">
+    <div><h2>{{ role_labels[role.role_name] }}</h2><div class="muted">{{ role.description }} · {{ role.users }} pengguna</div></div>
+    {% if not locked %}<button class="btn primary" type="submit">{{ icon('save', 16) }} Simpan perubahan</button>{% endif %}
+  </div>
+  {% if locked %}<div class="alert alert-info" style="margin-bottom:1rem;">{{ icon('lock', 18) }}<div>Super Admin selalu memiliki seluruh hak akses dan tidak bisa diubah, supaya sistem tidak terkunci.</div></div>{% endif %}
+  {% for group, perms in groups.items() %}
+  <div class="perm-group">
+    <h3>{{ group }}</h3>
+    {% for p in perms %}
+    <div class="switch-row">
+      <div><div class="t">{{ p.description }}</div><div class="d"><span class="code-chip">{{ p.permission_name }}</span></div></div>
+      <label class="switch"><input type="checkbox" name="perm" value="{{ p.permission_id }}" {{ 'checked' if locked or p.permission_id in granted }} {{ 'disabled' if locked }} aria-label="{{ p.description }}"><i></i></label>
+    </div>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</form>
+{% endblock %}

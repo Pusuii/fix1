@@ -1,0 +1,24 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, progress %}
+{% block tab %}
+<div class="grid g3" style="margin-bottom:1.25rem;">
+  <div class="stat"><div class="ico blue">{{ icon('users', 21) }}</div><div><div class="num">{{ rows|length }}</div><div class="lbl">Mahasiswa aktif</div></div></div>
+  <div class="stat"><div class="ico leaf">{{ icon('award', 21) }}</div><div><div class="num">{{ class_avg|num if class_avg is not none else '-' }}</div><div class="lbl">Rata-rata nilai kelas (%)</div></div></div>
+  <div class="stat"><div class="ico">{{ icon('book', 21) }}</div><div><div class="num">{{ ((rows|sum(attribute='s.mat_pct')) / rows|length)|round|int if rows else 0 }}%</div><div class="lbl">Rata-rata progres materi</div></div></div>
+</div>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Mahasiswa</th><th style="min-width:160px;">Progres materi</th><th class="num">Tugas</th><th class="num">Rata-rata tugas</th><th class="num">Rata-rata kuis</th><th class="num">Kehadiran</th><th class="num">Nilai rata-rata</th></tr></thead>
+    <tbody>{% for r in rows %}<tr>
+      <td><div class="cell-user"><div class="avatar sm">{{ r.st.full_name|initials }}</div><div><strong>{{ r.st.full_name }}</strong><span>{{ r.st.email }}</span></div></div></td>
+      <td>{{ progress(r.s.mat_pct) }}<div class="muted small">{{ r.s.mats_done }}/{{ r.s.mats_total }} materi</div></td>
+      <td class="num">{{ r.assign_done }}/{{ n_assign }}</td>
+      <td class="num">{{ r.assign_avg|num if r.assign_avg is not none else '-' }}</td>
+      <td class="num">{{ r.quiz_avg|num if r.quiz_avg is not none else '-' }}</td>
+      <td class="num">{{ (r.s.att_pct|round|int ~ '%') if r.s.att_pct is not none else '-' }}</td>
+      <td class="num"><strong>{{ r.s.avg|num if r.s.avg is not none else '-' }}</strong></td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{% call empty('users', 'Belum ada peserta kelas', 'Progres tampil setelah mahasiswa bergabung.') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "app.html" %}
+{% from "_macros.html" import field, select %}
+{% set back = url_for('superadmin.admins') if scope == 'super' else (url_for('admin.account_detail', uid=user.user_id) if user else url_for('admin.accounts')) %}
+{% block title %}{{ 'Ubah akun' if user else 'Akun baru' }} · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ url_for('superadmin.admins') if scope == 'super' else url_for('admin.accounts') }}">{{ 'Akun admin' if scope == 'super' else 'Akun pengguna' }}</a> {{ icon('chevron-right', 14) }} <span>{{ 'Ubah akun' if user else 'Akun baru' }}</span></div>
+<div class="page-head"><div><h1>{{ 'Ubah akun' if user else ('Akun admin baru' if scope == 'super' else 'Akun baru') }}</h1></div></div>
+<form class="card" method="post" style="max-width:720px;" autocomplete="off">
+  {{ csrf_input() }}
+  <div class="form-grid">
+    <div class="full">{{ field('Nama lengkap', 'full_name', form.get('full_name'), error=errors.full_name, required=True) }}</div>
+    <div class="full">{{ field('Email', 'email', form.get('email'), 'email', errors.email, required=True) }}</div>
+    {% if scope != 'super' %}{{ select('Peran', 'role', roles|map('string')|zip(roles|map('capitalize'))|list, form.get('role'), errors.role, required=True) }}{% endif %}
+    {{ select('Status akun', 'status', statuses, form.get('status'), errors.status, required=True) }}
+    <div class="full">{{ field('Password' ~ (' baru' if user else ''), 'password', '', 'password', errors.password, required=not user, autocomplete='new-password',
+        hint=('Kosongkan bila tidak ingin mengubah password.' if user else 'Minimal 8 karakter, kombinasi huruf dan angka.')) }}</div>
+  </div>
+  <div class="form-actions"><button class="btn primary" type="submit">{{ 'Simpan perubahan' if user else 'Buat akun' }}</button><a class="btn" href="{{ back }}">Batal</a></div>
+</form>
+{% endblock %}

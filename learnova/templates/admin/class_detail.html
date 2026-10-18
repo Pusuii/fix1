@@ -1,0 +1,49 @@
+{% extends "app.html" %}
+{% from "_macros.html" import empty, confirm_btn %}
+{% block title %}{{ cls.class_name }} · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ url_for('admin.classes') }}">Kelas</a> {{ icon('chevron-right', 14) }} <span>{{ cls.class_name }}</span></div>
+<div class="page-head">
+  <div><h1>{{ cls.class_name }}</h1><p>{{ cls.course_code }} · {{ cls.course_name }} · {{ cls.lecturer_name }} · {{ cls.semester }} {{ cls.academic_year }}</p></div>
+  <div class="actions">{{ badge(cls.status) }}<a class="btn" href="{{ url_for('admin.class_edit', cid=cls.class_id) }}">{{ icon('edit', 16) }} Ubah data</a></div>
+</div>
+<div class="grid g4">
+  <div class="stat"><div class="ico">{{ icon('book', 21) }}</div><div><div class="num">{{ stats.materials }}</div><div class="lbl">Materi</div></div></div>
+  <div class="stat"><div class="ico amber">{{ icon('task', 21) }}</div><div><div class="num">{{ stats.assignments }}</div><div class="lbl">Tugas</div></div></div>
+  <div class="stat"><div class="ico blue">{{ icon('timer', 21) }}</div><div><div class="num">{{ stats.quizzes }}</div><div class="lbl">Kuis</div></div></div>
+  <div class="stat"><div class="ico leaf">{{ icon('attendance', 21) }}</div><div><div class="num">{{ stats.sessions }}</div><div class="lbl">Sesi</div></div></div>
+</div>
+<div class="split section">
+  <section class="card flush">
+    <div class="card-head"><h2>Peserta ({{ students|length }})</h2></div>
+    {% if students %}
+    <div class="table-wrap"><table class="table"><thead><tr><th>Mahasiswa</th><th>Bergabung</th><th></th></tr></thead>
+      <tbody>{% for s in students %}<tr>
+        <td><div class="cell-user"><div class="avatar sm">{{ s.full_name|initials }}</div><div><strong>{{ s.full_name }}</strong><span>{{ s.email }}</span></div></div></td>
+        <td>{{ s.enrolled_at|dateid }}</td>
+        <td class="actions">{{ confirm_btn('Keluarkan', url_for('admin.class_unenroll', cid=cls.class_id, eid=s.enrollment_id), 'Keluarkan ' ~ s.full_name ~ ' dari kelas ini? Riwayat nilainya tetap tersimpan.', ic='x') }}</td></tr>{% endfor %}</tbody></table></div>
+    {% else %}{% call empty('users', 'Belum ada peserta', 'Tambahkan mahasiswa dari formulir di samping.') %}{% endcall %}{% endif %}
+  </section>
+  <div class="stack">
+    <section class="card">
+      <h3 style="margin-bottom:.8rem;">Tambah peserta</h3>
+      {% if candidates %}
+      <form method="post" action="{{ url_for('admin.class_enroll', cid=cls.class_id) }}">
+        {{ csrf_input() }}
+        <div class="field"><label for="f-student_id">Mahasiswa</label><select class="select" id="f-student_id" name="student_id" required><option value="">Pilih mahasiswa</option>{% for c in candidates %}<option value="{{ c.user_id }}">{{ c.full_name }} ({{ c.email }})</option>{% endfor %}</select></div>
+        <button class="btn primary block" type="submit">{{ icon('plus', 16) }} Tambahkan</button>
+      </form>
+      {% else %}<p class="muted" style="margin:0;">Semua mahasiswa aktif sudah tergabung di kelas ini.</p>{% endif %}
+    </section>
+    <section class="card">
+      <h3 style="margin-bottom:.8rem;">Status kelas</h3>
+      <form method="post" action="{{ url_for('admin.class_status', cid=cls.class_id) }}" class="row" style="flex-wrap:nowrap;">
+        {{ csrf_input() }}
+        <select class="select" name="status" aria-label="Status kelas">{% for v, l in statuses %}<option value="{{ v }}" {{ 'selected' if cls.status == v }}>{{ l }}</option>{% endfor %}</select>
+        <button class="btn" type="submit">Simpan</button>
+      </form>
+      <p class="muted small" style="margin:.7rem 0 0;">Kelas nonaktif atau selesai tidak menerima tugas, kuis, dan absensi baru dari mahasiswa.</p>
+    </section>
+  </div>
+</div>
+{% endblock %}

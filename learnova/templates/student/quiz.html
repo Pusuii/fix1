@@ -1,0 +1,45 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import deadline %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('student.quizzes', cid=cls.class_id) }}">Kuis</a> {{ icon('chevron-right', 14) }} <span>{{ quiz.title }}</span></div>
+<div class="split">
+  <section class="card">
+    <h2 style="font-size:1.5rem;margin-bottom:1rem;">{{ quiz.title }}</h2>
+    <dl class="kv">
+      <dt>Durasi</dt><dd>{{ quiz.duration_minutes }} menit</dd>
+      <dt>Jumlah soal</dt><dd>{{ n_questions }} soal · total {{ total_points|num }} poin</dd>
+      <dt>Tenggat</dt><dd>{{ deadline(quiz.deadline) }}</dd>
+      <dt>Percobaan</dt><dd>{{ attempts|selectattr('submitted_at')|list|length }} dari {{ max_att }}</dd>
+      <dt>Nilai maksimum</dt><dd>{{ quiz.max_score|num }}</dd>
+    </dl>
+    <hr>
+    {% if open_att %}
+      <div class="alert alert-info">{{ icon('timer', 18) }}<div>Anda masih punya percobaan yang sedang berjalan.</div></div>
+      <a class="btn primary" style="margin-top:1rem;" href="{{ url_for('student.quiz_attempt', cid=cls.class_id, qid=quiz.quiz_id, aid=open_att.attempt_id) }}">Lanjutkan mengerjakan</a>
+    {% elif reason %}
+      <div class="alert alert-warning">{{ icon('alert', 18) }}<div>{{ reason }}</div></div>
+    {% else %}
+      <p class="muted">Waktu mulai berjalan begitu Anda menekan tombol mulai dan tidak bisa dihentikan. Jawaban terkirim otomatis saat waktu habis.</p>
+      <form method="post" action="{{ url_for('student.quiz_start', cid=cls.class_id, qid=quiz.quiz_id) }}" data-confirm="Mulai kuis sekarang? Waktu {{ quiz.duration_minutes }} menit langsung berjalan.">
+        {{ csrf_input() }}<button class="btn primary" type="submit">{{ icon('play', 16) }} Mulai kuis</button>
+      </form>
+    {% endif %}
+  </section>
+  <aside class="card flush">
+    <div class="card-head"><h3>Riwayat percobaan</h3></div>
+    {% if attempts %}
+    <div class="list">
+      {% for a in attempts %}
+      <div class="list-row">
+        <div class="body"><strong>Percobaan {{ a.attempt_no }}</strong><span>{{ a.started_at|dt }}</span></div>
+        {% if a.submitted_at %}
+          {% if a.score is not none %}<strong class="mono">{{ a.score|num }}</strong>{% else %}{{ badge('menunggu') }}{% endif %}
+          <a class="btn sm" href="{{ url_for('student.quiz_result', cid=cls.class_id, qid=quiz.quiz_id, aid=a.attempt_id) }}">Lihat</a>
+        {% else %}<span class="badge badge-info">Berjalan</span>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}<div class="card-pad muted">Belum ada percobaan.</div>{% endif %}
+  </aside>
+</div>
+{% endblock %}

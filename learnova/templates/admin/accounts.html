@@ -1,0 +1,41 @@
+{% extends "app.html" %}
+{% from "_macros.html" import empty, paging %}
+{% block title %}Akun pengguna · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Akun pengguna</h1><p>Kelola akun mahasiswa dan dosen, verifikasi pendaftaran, dan aktifkan atau nonaktifkan akun.</p></div>
+  <div class="actions"><a class="btn primary" href="{{ url_for('admin.account_new') }}">{{ icon('user-plus', 17) }} Tambah akun</a></div>
+</div>
+{% if pending and status != 'pending' %}
+<div class="alert alert-warning" style="align-items:center;margin-bottom:1rem;">{{ icon('user-check', 18) }}<div style="flex:1;"><strong>{{ pending }} akun</strong> menunggu verifikasi.</div><a class="btn sm" href="{{ url_for('admin.accounts', status='pending') }}">Tampilkan</a></div>
+{% endif %}
+<form class="filters" method="get">
+  <div class="search-wrap">{{ icon('search', 17) }}<input class="input" type="search" name="q" value="{{ term }}" placeholder="Cari nama atau email" aria-label="Cari akun"></div>
+  <select class="select" name="role" aria-label="Peran"><option value="">Semua peran</option><option value="mahasiswa" {{ 'selected' if role == 'mahasiswa' }}>Mahasiswa</option><option value="dosen" {{ 'selected' if role == 'dosen' }}>Dosen</option></select>
+  <select class="select" name="status" aria-label="Status"><option value="">Semua status</option>{% for v, l in statuses %}<option value="{{ v }}" {{ 'selected' if status == v }}>{{ l }}</option>{% endfor %}</select>
+  <button class="btn" type="submit">{{ icon('filter', 15) }} Terapkan</button>
+  {% if term or role or status %}<a class="btn ghost" href="{{ url_for('admin.accounts') }}">Atur ulang</a>{% endif %}
+</form>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Pengguna</th><th>Peran</th><th>Status</th><th>Terdaftar</th><th></th></tr></thead>
+    <tbody>{% for u in rows %}<tr>
+      <td><div class="cell-user"><div class="avatar sm">{{ u.full_name|initials }}</div><div><a href="{{ url_for('admin.account_detail', uid=u.user_id) }}"><strong>{{ u.full_name }}</strong></a><span>{{ u.email }}</span></div></div></td>
+      <td>{{ role_labels[u.role_name] }}</td><td>{{ badge(u.account_status) }}</td><td>{{ u.created_at|dateid }}</td>
+      <td class="actions">
+        {% if u.account_status == 'pending' %}<a class="btn sm primary" href="{{ url_for('admin.account_detail', uid=u.user_id) }}">Verifikasi</a>
+        {% else %}
+          <a class="btn sm" href="{{ url_for('admin.account_detail', uid=u.user_id) }}">Detail</a>
+          <form class="inline" method="post" action="{{ url_for('admin.account_status', uid=u.user_id) }}" {% if u.account_status == 'aktif' %}data-confirm="Nonaktifkan akun {{ u.full_name }}? Pengguna tidak bisa masuk sampai diaktifkan kembali."{% endif %}>
+            {{ csrf_input() }}<input type="hidden" name="next" value="{{ request.full_path.rstrip('?') }}">
+            {% if u.account_status == 'aktif' %}<button class="btn sm danger" name="status" value="nonaktif" type="submit">Nonaktifkan</button>
+            {% else %}<button class="btn sm good" name="status" value="aktif" type="submit">Aktifkan</button>{% endif %}
+          </form>
+        {% endif %}
+      </td></tr>{% endfor %}</tbody>
+  </table></div>
+  {{ paging(pager) }}
+  {% else %}{% call empty('users', 'Tidak ada akun yang cocok', 'Ubah kata kunci atau filter pencarian.') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

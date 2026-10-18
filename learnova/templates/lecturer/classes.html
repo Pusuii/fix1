@@ -1,0 +1,23 @@
+{% extends "app.html" %}
+{% from "_macros.html" import empty %}
+{% block title %}Kelas saya · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Kelas saya</h1><p>Kelas yang Anda ampu. Buka kelas untuk mengelola materi, tugas, kuis, dan absensi.</p></div>
+  <div class="actions"><a class="btn primary" href="{{ url_for('lecturer.class_new') }}">{{ icon('plus', 17) }} Kelas baru</a></div>
+</div>
+{% if rows %}
+<div class="grid g3">
+  {% for c in rows %}
+  <a class="card class-card" href="{{ url_for('lecturer.class_home', cid=c.class_id) }}">
+    <div class="row between"><span class="code">{{ c.course_code }}</span>{{ badge(c.status) }}</div>
+    <div><h3>{{ c.class_name }}</h3><div class="muted small">{{ c.course_name }}</div></div>
+    <div class="meta"><span>{{ icon('users', 15) }} {{ c.students }}</span><span>{{ icon('book', 15) }} {{ c.materials }} materi</span><span>{{ icon('task', 15) }} {{ c.assignments }} tugas</span></div>
+    <div class="muted small">{{ c.semester }} {{ c.academic_year }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">{% call empty('book', 'Belum ada kelas', 'Buat kelas untuk mulai mengajar di Learnova.') %}<a class="btn primary" href="{{ url_for('lecturer.class_new') }}">Buat kelas</a>{% endcall %}</div>
+{% endif %}
+{% endblock %}

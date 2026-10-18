@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+{% block title %}Daftar · {{ app_name }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">{% endblock %}
+{% block body %}
+<div class="auth">
+  <aside class="auth-art">
+    <a class="brand" href="{{ url_for('public.landing') }}"><img src="{{ url_for('static', filename='img/logo-icon.png') }}" alt="" width="34" height="34" style="border-radius:9px"><span>{{ app_name }}</span></a>
+    <blockquote>Satu akun untuk semua kelas Anda.</blockquote>
+    <small>{{ cfg.institution }}</small>
+  </aside>
+  <main class="auth-form">
+    <div class="auth-box">
+      <h1>Buat akun</h1>
+      <p>{% if cfg.require_verification == '1' %}Akun akan aktif setelah diverifikasi admin.{% else %}Akun langsung aktif setelah dibuat.{% endif %}</p>
+      <form method="post" novalidate>
+        {{ csrf_input() }}
+        <div class="field {{ 'has-error' if errors.role }}">
+          <span class="label">Saya mendaftar sebagai</span>
+          <div class="role-choice">
+            <label><input type="radio" name="role" value="mahasiswa" {{ 'checked' if form.get('role', 'mahasiswa') == 'mahasiswa' }}> Mahasiswa</label>
+            <label><input type="radio" name="role" value="dosen" {{ 'checked' if form.get('role') == 'dosen' }}> Dosen</label>
+          </div>
+          {% if errors.role %}<div class="err">{{ errors.role }}</div>{% endif %}
+        </div>
+        {{ field('Nama lengkap', 'full_name', form.get('full_name'), error=errors.full_name, required=True, autocomplete='name') }}
+        {{ field('Email', 'email', form.get('email'), 'email', error=errors.email, required=True, autocomplete='email') }}
+        {{ field('Password', 'password', '', 'password', error=errors.password, hint='Minimal 8 karakter, kombinasi huruf dan angka.', required=True, autocomplete='new-password') }}
+        {{ field('Ulangi password', 'confirm', '', 'password', error=errors.confirm, required=True, autocomplete='new-password') }}
+        <button class="btn primary block" type="submit" style="padding:.85rem;">Daftar</button>
+      </form>
+      <p style="margin-top:1.25rem;" class="muted">Sudah punya akun? <a href="{{ url_for('auth.login') }}">Masuk</a></p>
+    </div>
+  </main>
+</div>
+{% endblock %}

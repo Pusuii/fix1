@@ -1,0 +1,46 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import deadline %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('student.assignments', cid=cls.class_id) }}">Tugas</a> {{ icon('chevron-right', 14) }} <span>{{ a.title }}</span></div>
+<div class="split">
+  <section class="card">
+    <div class="row between" style="margin-bottom:.8rem;"><h2 style="font-size:1.5rem;">{{ a.title }}</h2>{{ badge(state) }}</div>
+    <p class="prose">{{ a.instructions or 'Tidak ada instruksi tambahan.' }}</p>
+    <dl class="kv" style="margin-top:1rem;">
+      <dt>Tenggat</dt><dd>{{ deadline(a.deadline, done=sub is not none) }}</dd>
+      <dt>Nilai maksimum</dt><dd>{{ a.max_score|num }}</dd>
+    </dl>
+    <hr>
+    {% if sub %}
+      <h3 style="margin-bottom:.6rem;">Pengumpulan Anda</h3>
+      <div class="alert alert-info">{{ icon('file', 18) }}<div><a href="{{ url_for('download', filename=sub.file_url) }}" target="_blank">{{ sub.file_url|filename }}</a><br><span class="small">Dikirim {{ sub.submitted_at|dt }}</span></div></div>
+    {% endif %}
+    {% if late and not sub %}
+      <div class="alert alert-error">{{ icon('clock', 18) }}<div><strong>Terlambat.</strong> Tenggat sudah lewat pada {{ a.deadline|dt }}, jadi pengumpulan ditutup. Hubungi dosen bila ada alasan khusus.</div></div>
+    {% elif can_submit %}
+      <form method="post" enctype="multipart/form-data" action="{{ url_for('student.submit_assignment', cid=cls.class_id, aid=a.assignment_id) }}" style="margin-top:1rem;">
+        {{ csrf_input() }}
+        <div class="field"><label for="f-file">{{ 'Ganti berkas' if sub else 'Unggah berkas tugas' }}</label>
+          <input class="input" id="f-file" type="file" name="file" required>
+          <div class="hint">Maksimum {{ max_mb }} MB. Anda dapat mengganti berkas selama belum lewat tenggat dan belum dinilai.</div></div>
+        <button class="btn primary" type="submit">{{ icon('upload', 16) }} {{ 'Kirim ulang' if sub else 'Kirim tugas' }}</button>
+      </form>
+    {% elif sub and sub.status == 'dinilai' %}
+      <p class="muted small">Tugas sudah dinilai sehingga berkas tidak dapat diganti.</p>
+    {% elif cls.status != 'aktif' %}
+      <p class="muted small">Kelas sudah tidak aktif.</p>
+    {% endif %}
+  </section>
+  <aside class="card">
+    <h3 style="margin-bottom:.8rem;">Nilai &amp; umpan balik</h3>
+    {% if sub and sub.score is not none %}
+      <div class="stat" style="border:0;padding:0;margin-bottom:1rem;"><div class="ico leaf">{{ icon('award', 21) }}</div><div><div class="num">{{ sub.score|num }}<span class="muted" style="font-size:1rem;"> / {{ a.max_score|num }}</span></div><div class="lbl">Nilai Anda</div></div></div>
+      {% if sub.feedback %}<div class="alert alert-info">{{ icon('message', 17) }}<div>{{ sub.feedback }}</div></div>{% endif %}
+    {% elif sub %}
+      <p class="muted">Menunggu penilaian dosen.</p>
+    {% else %}
+      <p class="muted">Nilai akan muncul setelah Anda mengumpulkan tugas dan dosen menilainya.</p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

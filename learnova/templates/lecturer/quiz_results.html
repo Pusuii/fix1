@@ -1,0 +1,38 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('lecturer.quizzes', cid=cls.class_id) }}">Kuis</a> {{ icon('chevron-right', 14) }} <a href="{{ url_for('lecturer.quiz', cid=cls.class_id, qid=z.quiz_id) }}">{{ z.title }}</a> {{ icon('chevron-right', 14) }} <span>Hasil</span></div>
+<section class="card flush" style="margin-bottom:1.5rem;">
+  <div class="card-head"><h2>Percobaan mahasiswa</h2><span class="muted small">{{ attempts|length }} percobaan</span></div>
+  {% if attempts %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Mahasiswa</th><th>Percobaan</th><th>Dikirim</th><th class="num">Nilai</th></tr></thead>
+    <tbody>{% for a in attempts %}<tr>
+      <td><div class="cell-user"><div class="avatar sm">{{ a.full_name|initials }}</div><strong>{{ a.full_name }}</strong></div></td>
+      <td>ke-{{ a.attempt_no }}</td><td>{{ a.submitted_at|dt }}</td>
+      <td class="num">{% if a.score is not none %}<strong>{{ a.score|num }}</strong><span class="muted"> / {{ z.max_score|num }}</span>{% else %}{{ badge('menunggu') }}{% endif %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{% call empty('quiz', 'Belum ada yang mengerjakan', 'Hasil akan muncul setelah mahasiswa mengirim jawaban.') %}{% endcall %}{% endif %}
+</section>
+<section id="grading">
+  <h2 style="margin-bottom:.8rem;">Penilaian jawaban esai</h2>
+  {% if essays %}
+  <div class="card flush"><div class="list">
+  {% for e in essays %}
+    <div class="list-row" style="align-items:flex-start;flex-wrap:wrap;">
+      <div class="body" style="min-width:260px;">
+        <strong>{{ e.full_name }} <span class="muted" style="font-weight:500;">· percobaan {{ e.attempt_no }}</span></strong>
+        <span>{{ e.question_text }}</span>
+        <div class="alert alert-info" style="margin-top:.6rem;white-space:pre-wrap;">{{ e.answer_text or '(tidak dijawab)' }}</div>
+      </div>
+      <form method="post" action="{{ url_for('lecturer.essay_grade', cid=cls.class_id, qid=z.quiz_id, ans_id=e.answer_id) }}" class="row" style="align-items:flex-start;">
+        {{ csrf_input() }}
+        <div style="width:100px;"><label class="sr-only" for="es{{ e.answer_id }}">Poin</label><input class="input" id="es{{ e.answer_id }}" name="score" type="number" min="0" max="{{ e.points }}" step="any" value="{{ e.score_awarded|num if e.score_awarded is not none else '' }}" placeholder="0-{{ e.points|num }}" required></div>
+        <button class="btn sm {{ 'primary' if e.score_awarded is none }}" type="submit" style="margin-top:.35rem;">{{ 'Perbarui' if e.score_awarded is not none else 'Simpan' }}</button>
+      </form>
+    </div>
+  {% endfor %}
+  </div></div>
+  {% else %}<div class="card muted">Tidak ada jawaban esai untuk dinilai.</div>{% endif %}
+</section>
+{% endblock %}

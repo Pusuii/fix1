@@ -1,0 +1,50 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, deadline, confirm_btn %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('lecturer.quizzes', cid=cls.class_id) }}">Kuis</a> {{ icon('chevron-right', 14) }} <span>{{ z.title }}</span></div>
+<div class="card" style="margin-bottom:1.25rem;">
+  <div class="row between">
+    <div><h2 style="font-size:1.4rem;">{{ z.title }}</h2>
+      <div class="row" style="gap:1.2rem;margin-top:.5rem;"><span class="deadline">{{ icon('timer', 15) }} {{ z.duration_minutes }} menit</span>{{ deadline(z.deadline, done=True) }}<span class="deadline">{{ icon('award', 15) }} Nilai maks. {{ z.max_score|num }}</span><span class="deadline">{{ icon('hash', 15) }} {{ questions|length }} soal · {{ total_points|num }} poin</span></div></div>
+    <div class="row"><a class="btn sm" href="{{ url_for('lecturer.quiz_results', cid=cls.class_id, qid=z.quiz_id) }}">{{ icon('chart', 14) }} Hasil ({{ attempts }})</a><a class="btn sm" href="{{ url_for('lecturer.quiz_edit', cid=cls.class_id, qid=z.quiz_id) }}">{{ icon('edit', 14) }} Ubah</a>
+      {{ confirm_btn('Hapus', url_for('lecturer.quiz_delete', cid=cls.class_id, qid=z.quiz_id), 'Hapus kuis ini beserta semua soal dan hasil mahasiswa?') }}</div>
+  </div>
+</div>
+<div class="split">
+  <section>
+    <h2 style="margin-bottom:.8rem;">Soal</h2>
+    {% for k in questions %}
+    <div class="q-card">
+      <div class="row between"><div class="q-no">Soal {{ loop.index }} · {{ 'Pilihan ganda' if k.question_type == 'pilihan_ganda' else 'Esai' }} · {{ k.points|num }} poin</div>
+        {{ confirm_btn('Hapus', url_for('lecturer.question_delete', cid=cls.class_id, qid=z.quiz_id, quid=k.question_id), 'Hapus soal ini?') }}</div>
+      <div class="q-text">{{ k.question_text }}</div>
+      {% for o in options.get(k.question_id, []) %}<div class="opt {{ 'right' if o.is_correct }}">{{ icon('check-circle' if o.is_correct else 'minus', 17) }}<span>{{ o.option_text }}</span></div>{% endfor %}
+      {% if k.question_type == 'esai' %}<p class="muted small" style="margin:0;">Dinilai manual oleh dosen.</p>{% endif %}
+    </div>
+    {% else %}
+    <div class="card">{% call empty('quiz', 'Belum ada soal', 'Tambahkan soal lewat formulir di samping.') %}{% endcall %}</div>
+    {% endfor %}
+  </section>
+  <aside class="card" style="position:sticky;top:1rem;">
+    <h3 style="margin-bottom:1rem;">Tambah soal</h3>
+    <form method="post" action="{{ url_for('lecturer.question_add', cid=cls.class_id, qid=z.quiz_id) }}">
+      {{ csrf_input() }}
+      <div class="field"><label for="f-question_type">Jenis soal</label>
+        <select class="select" id="f-question_type" name="question_type" data-switch="qtype"><option value="pilihan_ganda">Pilihan ganda</option><option value="esai">Esai</option></select></div>
+      <div class="field"><label for="f-question_text">Pertanyaan</label><textarea class="textarea" id="f-question_text" name="question_text" rows="3" required></textarea></div>
+      <div class="field"><label for="f-points">Poin</label><input class="input" id="f-points" name="points" type="number" min="1" step="any" value="10" required></div>
+      <div data-show-when="qtype:pilihan_ganda">
+        <span class="label">Pilihan jawaban</span>
+        {% for i in range(5) %}
+        <div class="row" style="flex-wrap:nowrap;margin-bottom:.45rem;">
+          <input type="radio" name="correct" value="{{ i }}" aria-label="Jawaban benar: pilihan {{ 'ABCDE'[i] }}" {{ 'checked' if i == 0 }} style="accent-color:var(--violet);width:17px;height:17px;flex:none;">
+          <input class="input" name="option{{ i }}" placeholder="Pilihan {{ 'ABCDE'[i] }}{{ ' (opsional)' if i > 1 }}" {{ 'required' if i < 2 }}>
+        </div>
+        {% endfor %}
+        <div class="hint" style="margin-bottom:1rem;">Pilih bulatan di samping jawaban yang benar. Kosongkan pilihan yang tidak dipakai.</div>
+      </div>
+      <button class="btn primary block" type="submit">{{ icon('plus', 16) }} Tambah soal</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}

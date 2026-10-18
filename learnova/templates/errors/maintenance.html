@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Sedang pemeliharaan · {{ app_name }}{% endblock %}
+{% block body %}
+<main style="min-height:100vh;display:grid;place-items:center;padding:2rem;">
+  <div style="max-width:480px;text-align:center;">
+    <img src="{{ url_for('static', filename='img/logo-color.png') }}" alt="" width="84" style="margin:0 auto 1.25rem;">
+    <h1 style="margin-bottom:.7rem;">Sedang dalam pemeliharaan</h1>
+    <p class="muted">{{ app_name }} sedang diperbarui agar lebih baik. Silakan kembali beberapa saat lagi. Untuk keperluan mendesak, hubungi {{ cfg.support_email }}.</p>
+    <a class="btn primary" href="{{ url_for('auth.login') }}">Login admin</a>
+  </div>
+</main>
+{% endblock %}

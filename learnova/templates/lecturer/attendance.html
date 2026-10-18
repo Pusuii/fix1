@@ -1,0 +1,32 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty %}
+{% block tab %}
+<div class="split">
+  <section class="card flush">
+    <div class="card-head"><h2>Sesi perkuliahan</h2><a class="btn sm" href="{{ url_for('lecturer.attendance_report', cid=cls.class_id) }}">{{ icon('chart', 14) }} Laporan kehadiran</a></div>
+    {% if sessions %}
+    <div class="list">
+      {% for s in sessions %}
+      <div class="list-row">
+        <div class="ico {{ 'done' if s.attendance_open }}">{{ icon('attendance', 19) }}</div>
+        <div class="body"><a href="{{ url_for('lecturer.session_detail', cid=cls.class_id, sid=s.session_id) }}"><strong>{{ s.topic }}</strong></a><span>{{ s.session_date|dt }} · hadir {{ s.present }} dari {{ total }}</span></div>
+        {{ badge('terbuka' if s.attendance_open else 'tertutup') }}
+        <form class="inline" method="post" action="{{ url_for('lecturer.session_toggle', cid=cls.class_id, sid=s.session_id) }}">{{ csrf_input() }}
+          <button class="btn sm {{ '' if s.attendance_open else 'good' }}" type="submit">{{ 'Tutup absensi' if s.attendance_open else 'Buka absensi' }}</button></form>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}{% call empty('attendance', 'Belum ada sesi', 'Buat sesi perkuliahan lalu buka absensinya saat kelas berlangsung.') %}{% endcall %}{% endif %}
+  </section>
+  <aside class="card">
+    <h3 style="margin-bottom:1rem;">Buat sesi baru</h3>
+    <form method="post" action="{{ url_for('lecturer.session_new', cid=cls.class_id) }}">
+      {{ csrf_input() }}
+      <div class="field"><label for="f-topic">Topik sesi</label><input class="input" id="f-topic" name="topic" required minlength="3" placeholder="Contoh: Normalisasi data"></div>
+      <div class="field"><label for="f-session_date">Tanggal dan jam</label><input class="input" id="f-session_date" name="session_date" type="datetime-local" required></div>
+      <label class="check" style="margin-bottom:1rem;"><input type="checkbox" name="open_now" value="1"> <span>Buka absensi sekarang</span></label>
+      <button class="btn primary block" type="submit">{{ icon('plus', 16) }} Buat sesi</button>
+    </form>
+  </aside>
+</div>
+{% endblock %}

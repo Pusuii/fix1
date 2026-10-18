@@ -1,0 +1,26 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, deadline %}
+{% block tab %}
+<div class="card flush">
+  {% if items %}
+  <div class="list">
+    {% for z in items %}
+    <a class="list-row" href="{{ url_for('student.quiz', cid=cls.class_id, qid=z.quiz_id) }}">
+      <div class="ico {{ 'done' if z.attempts }}">{{ icon('timer', 19) }}</div>
+      <div class="body">
+        <strong>{{ z.title }}</strong>
+        <span>{{ z.duration_minutes }} menit · {{ z.attempts }}/{{ max_att }} percobaan</span>
+        <div>{{ deadline(z.deadline, done=z.attempts > 0) }}</div>
+      </div>
+      {% if z.best is not none %}<strong class="mono">{{ z.best|num }}<span class="muted">/{{ z.max_score|num }}</span></strong>
+      {% elif z.pending %}{{ badge('menunggu') }}{% endif %}
+      {% if open_attempts[z.quiz_id] %}<span class="badge badge-info">Sedang dikerjakan</span>
+      {% elif is_past(z.deadline) and not z.attempts %}<span class="badge badge-bad">Terlewat</span>
+      {% elif z.attempts >= max_att %}<span class="badge badge-mute">Selesai</span>
+      {% else %}<span class="badge badge-brand">Tersedia</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}{% call empty('timer', 'Belum ada kuis', 'Kuis akan muncul di sini setelah dosen membuatnya.') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

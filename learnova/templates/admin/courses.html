@@ -1,0 +1,20 @@
+{% extends "app.html" %}
+{% from "_macros.html" import empty, confirm_btn %}
+{% block title %}Mata kuliah · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Mata kuliah</h1><p>Daftar mata kuliah yang dapat dibuka menjadi kelas oleh dosen atau admin.</p></div>
+  <div class="actions"><a class="btn primary" href="{{ url_for('admin.course_new') }}">{{ icon('plus', 17) }} Tambah mata kuliah</a></div></div>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Kode</th><th>Mata kuliah</th><th class="num">Kelas</th><th></th></tr></thead>
+    <tbody>{% for c in rows %}<tr>
+      <td><span class="code-chip">{{ c.course_code }}</span></td>
+      <td><strong>{{ c.course_name }}</strong><div class="muted small">{{ (c.description or '')|truncate(90) }}</div></td>
+      <td class="num">{{ c.classes }}</td>
+      <td class="actions"><a class="btn sm" href="{{ url_for('admin.course_edit', cid=c.course_id) }}">{{ icon('edit', 14) }} Ubah</a>
+        {% if not c.classes %}{{ confirm_btn('Hapus', url_for('admin.course_delete', cid=c.course_id), 'Hapus mata kuliah ' ~ c.course_name ~ '?') }}{% endif %}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{% call empty('books', 'Belum ada mata kuliah', 'Tambahkan mata kuliah agar kelas bisa dibuat.') %}<a class="btn primary" href="{{ url_for('admin.course_new') }}">Tambah mata kuliah</a>{% endcall %}{% endif %}
+</div>
+{% endblock %}

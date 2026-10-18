@@ -1,0 +1,21 @@
+{% extends "app.html" %}
+{% from "_macros.html" import empty %}
+{% block title %}Akun admin · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Akun admin</h1><p>Admin mengelola akun pengguna, kelas, dan laporan. Hak akses mereka diatur di menu Role &amp; hak akses.</p></div>
+  <div class="actions"><a class="btn primary" href="{{ url_for('superadmin.admin_new') }}">{{ icon('user-plus', 17) }} Tambah admin</a></div></div>
+<form class="filters" method="get"><div class="search-wrap">{{ icon('search', 17) }}<input class="input" type="search" name="q" value="{{ term }}" placeholder="Cari nama atau email" aria-label="Cari admin"></div><button class="btn" type="submit">Cari</button></form>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Admin</th><th>Status</th><th>Login terakhir</th><th class="num">Tindakan</th><th></th></tr></thead>
+    <tbody>{% for u in rows %}<tr>
+      <td><div class="cell-user"><div class="avatar sm">{{ u.full_name|initials }}</div><div><strong>{{ u.full_name }}</strong><span>{{ u.email }}</span></div></div></td>
+      <td>{{ badge(u.account_status) }}</td><td>{{ u.last_login|dt if u.last_login else 'Belum pernah' }}</td><td class="num">{{ u.actions }}</td>
+      <td class="actions"><a class="btn sm" href="{{ url_for('superadmin.admin_edit', uid=u.user_id) }}">{{ icon('edit', 14) }} Ubah</a>
+        <form class="inline" method="post" action="{{ url_for('superadmin.admin_status', uid=u.user_id) }}" {% if u.account_status == 'aktif' %}data-confirm="Nonaktifkan admin {{ u.full_name }}?"{% endif %}>{{ csrf_input() }}
+          {% if u.account_status == 'aktif' %}<button class="btn sm danger" name="status" value="nonaktif" type="submit">Nonaktifkan</button>{% else %}<button class="btn sm good" name="status" value="aktif" type="submit">Aktifkan</button>{% endif %}</form></td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{% call empty('user-cog', 'Belum ada akun admin', 'Tambahkan admin untuk membantu mengelola platform.') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, deadline %}
+{% block tab %}
+<div class="row between" style="margin-bottom:1rem;">
+  <p class="muted" style="margin:0;">Pilihan ganda dinilai otomatis; esai dinilai oleh Anda.</p>
+  <a class="btn primary" href="{{ url_for('lecturer.quiz_new', cid=cls.class_id) }}">{{ icon('plus', 17) }} Buat kuis</a>
+</div>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Kuis</th><th>Tenggat</th><th class="num">Soal</th><th class="num">Percobaan</th><th></th></tr></thead>
+    <tbody>{% for z in rows %}
+      <tr>
+        <td><a href="{{ url_for('lecturer.quiz', cid=cls.class_id, qid=z.quiz_id) }}"><strong>{{ z.title }}</strong></a><div class="muted small">{{ z.duration_minutes }} menit · nilai maks. {{ z.max_score|num }}</div></td>
+        <td>{{ deadline(z.deadline, done=True) }}</td>
+        <td class="num">{{ z.questions }}</td>
+        <td class="num">{{ z.attempts }}{% if z.pending %} <span class="badge badge-warn">{{ z.pending }} esai</span>{% endif %}</td>
+        <td class="actions"><a class="btn sm" href="{{ url_for('lecturer.quiz_results', cid=cls.class_id, qid=z.quiz_id) }}">Hasil</a> <a class="btn sm" href="{{ url_for('lecturer.quiz', cid=cls.class_id, qid=z.quiz_id) }}">Kelola</a></td>
+      </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{% call empty('quiz', 'Belum ada kuis', 'Buat kuis lalu tambahkan soal pilihan ganda atau esai.') %}<a class="btn primary" href="{{ url_for('lecturer.quiz_new', cid=cls.class_id) }}">Buat kuis</a>{% endcall %}{% endif %}
+</div>
+{% endblock %}

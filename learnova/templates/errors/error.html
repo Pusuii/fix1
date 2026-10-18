@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · {{ app_name }}{% endblock %}
+{% block body %}
+<main style="min-height:100vh;display:grid;place-items:center;padding:2rem;">
+  <div style="max-width:460px;text-align:center;">
+    <img src="{{ url_for('static', filename='img/logo-color.png') }}" alt="" width="84" style="margin:0 auto 1.25rem;">
+    <div class="muted" style="font-family:var(--font-display);font-weight:700;">Kode {{ code }}</div>
+    <h1 style="margin:.35rem 0 .7rem;">{{ title }}</h1>
+    <p class="muted">{{ message }}</p>
+    <div class="row" style="justify-content:center;margin-top:1.25rem;">
+      <a class="btn primary" href="{{ url_for('auth.dashboard') if g.user else url_for('public.landing') }}">{{ 'Kembali ke beranda' }}</a>
+      <a class="btn" href="javascript:history.back()">Halaman sebelumnya</a>
+    </div>
+  </div>
+</main>
+{% endblock %}

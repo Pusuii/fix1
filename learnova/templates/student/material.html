@@ -1,0 +1,43 @@
+{% extends "class_base.html" %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('student.materials', cid=cls.class_id) }}">Materi</a> {{ icon('chevron-right', 14) }} <span>{{ m.title }}</span></div>
+<div class="split">
+  <section class="card">
+    <div class="row between" style="margin-bottom:.8rem;"><span class="badge badge-brand">{{ m.material_type|capitalize }} · urutan {{ m.sequence_no }}</span>{% if m.done %}{{ badge('selesai', 'Selesai') }}{% endif %}</div>
+    <h2 style="font-size:1.6rem;margin-bottom:.6rem;">{{ m.title }}</h2>
+    {% if m.locked %}
+      <div class="alert alert-warning">{{ icon('lock', 18) }}<div><strong>Materi ini masih terkunci.</strong> Selesaikan <strong>{{ m.prereq_title }}</strong> terlebih dahulu agar materi ini terbuka.</div></div>
+      <a class="btn primary" style="margin-top:1rem;" href="{{ url_for('student.material', cid=cls.class_id, mid=m.prerequisite_id) }}">Buka materi prasyarat</a>
+    {% else %}
+      {% if m.description %}<p class="prose">{{ m.description }}</p>{% endif %}
+      {% if m.file_url %}
+      <div class="row" style="margin:1rem 0;">
+        {% if is_external(m.file_url) %}
+          <a class="btn primary" href="{{ m.file_url }}" target="_blank" rel="noopener noreferrer">{{ icon('external', 16) }} Buka tautan</a>
+        {% else %}
+          <a class="btn primary" href="{{ url_for('download', filename=m.file_url) }}" target="_blank">{{ icon('eye', 16) }} Buka materi</a>
+          <a class="btn" href="{{ url_for('download', filename=m.file_url, dl=1) }}">{{ icon('download', 16) }} Unduh</a>
+          <span class="muted small">{{ m.file_url|filename }}</span>
+        {% endif %}
+      </div>
+      {% else %}<p class="muted">Materi ini tidak memiliki lampiran.</p>{% endif %}
+      <hr>
+      {% if m.done %}
+        <div class="alert alert-success">{{ icon('check-circle', 18) }}<div>Anda menandai materi ini selesai pada {{ m.completed_at|dt }}.</div></div>
+      {% elif cls.status == 'aktif' %}
+        <form method="post" action="{{ url_for('student.material_done', cid=cls.class_id, mid=m.material_id) }}">{{ csrf_input() }}
+          <button class="btn good" type="submit">{{ icon('check', 17) }} Tandai selesai</button>
+          <span class="muted small" style="margin-left:.6rem;">Progres belajar akan diperbarui.</span>
+        </form>
+      {% endif %}
+    {% endif %}
+  </section>
+  <aside class="card">
+    <h3 style="margin-bottom:.8rem;">Informasi</h3>
+    <dl class="kv">
+      <dt>Prasyarat</dt><dd>{{ m.prereq_title or 'Tidak ada' }}</dd>
+      <dt>Ditambahkan</dt><dd>{{ m.created_at|dateid }}</dd>
+    </dl>
+  </aside>
+</div>
+{% endblock %}

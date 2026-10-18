@@ -1,0 +1,28 @@
+{% extends "app.html" %}
+{% from "_macros.html" import stat, bars %}
+{% block title %}Beranda sistem · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Halo, {{ me.full_name.split()[0] }}</h1><p>Gambaran keseluruhan platform, peran, dan aktivitas penting.</p></div></div>
+<div class="grid g4">
+  {{ stat('users', counts.students + counts.lecturers, 'Mahasiswa dan dosen') }}
+  {{ stat('user-cog', counts.admins, 'Admin dan super admin', 'blue') }}
+  {{ stat('book', counts.classes, 'Kelas aktif', 'leaf') }}
+  {{ stat('flag', counts.reports_open, 'Laporan belum selesai', 'amber') }}
+</div>
+<div class="grid g2 section">
+  <section class="card"><div class="row between"><h3>Login per hari</h3><span class="muted small">14 hari</span></div>{{ bars(series.login) }}</section>
+  <section class="card"><div class="row between"><h3>Pengumpulan tugas</h3><span class="muted small">14 hari</span></div>{{ bars(series.submission, 'leaf') }}</section>
+</div>
+<div class="split section">
+  <section class="card flush">
+    <div class="card-head"><h2>Peran dan hak akses</h2>{% if has_perm('role.manage') %}<a href="{{ url_for('superadmin.permissions') }}">Atur</a>{% endif %}</div>
+    <div class="table-wrap"><table class="table"><thead><tr><th>Peran</th><th class="num">Pengguna</th><th class="num">Hak akses</th></tr></thead>
+      <tbody>{% for r in role_rows %}<tr><td><strong>{{ role_labels[r.role_name] }}</strong><div class="muted small">{{ r.description }}</div></td><td class="num">{{ r.users }}</td>
+        <td class="num">{{ total_perms if r.role_name == 'super_admin' else r.perms }}/{{ total_perms }}</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+  <section class="card flush">
+    <div class="card-head"><h2>Tindakan terbaru</h2>{% if has_perm('audit.view') %}<a href="{{ url_for('superadmin.audit_log') }}">Audit log</a>{% endif %}</div>
+    <div class="list">{% for l in recent %}<div class="list-row"><div class="body"><strong>{{ label(l.action) }}</strong><span>{{ l.full_name or 'Sistem' }} · {{ l.created_at|rel }}</span></div></div>{% else %}<div class="card-pad muted">Belum ada tindakan.</div>{% endfor %}</div>
+  </section>
+</div>
+{% endblock %}

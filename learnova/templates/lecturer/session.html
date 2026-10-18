@@ -1,0 +1,32 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, confirm_btn %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('lecturer.attendance', cid=cls.class_id) }}">Absensi</a> {{ icon('chevron-right', 14) }} <span>{{ s.topic }}</span></div>
+<div class="card row between" style="margin-bottom:1.25rem;">
+  <div><h2 style="font-size:1.4rem;">{{ s.topic }}</h2><div class="muted">{{ s.session_date|dt }}</div></div>
+  <div class="row">{{ badge('terbuka' if s.attendance_open else 'tertutup') }}
+    <form class="inline" method="post" action="{{ url_for('lecturer.session_toggle', cid=cls.class_id, sid=s.session_id) }}">{{ csrf_input() }}<input type="hidden" name="next" value="{{ request.path }}">
+      <button class="btn sm {{ '' if s.attendance_open else 'good' }}" type="submit">{{ 'Tutup absensi' if s.attendance_open else 'Buka absensi' }}</button></form>
+    {{ confirm_btn('Hapus sesi', url_for('lecturer.session_delete', cid=cls.class_id, sid=s.session_id), 'Hapus sesi ini beserta data kehadirannya?') }}</div>
+</div>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Mahasiswa</th><th>Status</th><th>Tercatat</th><th class="actions">Ubah status</th></tr></thead>
+    <tbody>{% for r in rows %}<tr>
+      <td><div class="cell-user"><div class="avatar sm">{{ r.full_name|initials }}</div><div><strong>{{ r.full_name }}</strong><span>{{ r.email }}</span></div></div></td>
+      <td>{% if r.attendance_status %}{{ badge(r.attendance_status) }}{% else %}<span class="badge badge-mute">Belum mengisi</span>{% endif %}</td>
+      <td class="muted">{{ r.recorded_at|dt if r.recorded_at else '-' }}</td>
+      <td class="actions">
+        <form class="inline row" method="post" action="{{ url_for('lecturer.session_record', cid=cls.class_id, sid=s.session_id) }}" style="justify-content:flex-end;gap:.3rem;">
+          {{ csrf_input() }}<input type="hidden" name="student_id" value="{{ r.user_id }}">
+          {% for st, lb in [('hadir', 'H'), ('izin', 'I'), ('sakit', 'S'), ('alpa', 'A')] %}
+          <button class="btn sm {{ 'primary' if r.attendance_status == st }}" name="status" value="{{ st }}" type="submit" title="{{ st|capitalize }}" aria-label="{{ r.full_name }}: {{ st }}" data-keep>{{ lb }}</button>
+          {% endfor %}
+        </form>
+      </td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{% call empty('users', 'Belum ada peserta kelas') %}{% endcall %}{% endif %}
+</div>
+<p class="muted small" style="margin-top:.7rem;">H = hadir, I = izin, S = sakit, A = alpa. Mahasiswa yang belum mengisi dihitung tidak hadir pada laporan.</p>
+{% endblock %}

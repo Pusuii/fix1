@@ -1,0 +1,45 @@
+{% extends "app.html" %}
+{% from "_macros.html" import field %}
+{% block title %}Profil · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Profil</h1><p>Kelola data akun dan keamanan Anda.</p></div></div>
+<div class="split">
+  <div class="stack">
+    <section class="card">
+      <h2 style="margin-bottom:1rem;">Data akun</h2>
+      <form method="post">
+        {{ csrf_input() }}<input type="hidden" name="action" value="profile">
+        {{ field('Nama lengkap', 'full_name', me.full_name, error=errors.full_name, required=True) }}
+        <div class="field"><label>Email</label><input class="input" value="{{ me.email }}" disabled><div class="hint">Email dipakai untuk login. Hubungi admin bila perlu mengubahnya.</div></div>
+        <button class="btn primary" type="submit">Simpan perubahan</button>
+      </form>
+    </section>
+    <section class="card">
+      <h2 style="margin-bottom:1rem;">Ganti password</h2>
+      <form method="post">
+        {{ csrf_input() }}<input type="hidden" name="action" value="password">
+        {{ field('Password saat ini', 'current', '', 'password', error=errors.current, required=True, autocomplete='current-password') }}
+        {{ field('Password baru', 'new', '', 'password', error=errors.new, hint='Minimal 8 karakter, kombinasi huruf dan angka.', required=True, autocomplete='new-password') }}
+        {{ field('Ulangi password baru', 'confirm', '', 'password', error=errors.confirm, required=True, autocomplete='new-password') }}
+        <button class="btn primary" type="submit">Ganti password</button>
+      </form>
+    </section>
+  </div>
+  <aside class="card">
+    <div class="row" style="margin-bottom:1rem;"><div class="avatar" style="width:52px;height:52px;font-size:1rem;">{{ me.full_name|initials }}</div><div><strong>{{ me.full_name }}</strong><div class="muted small">{{ role_labels[me.role_name] }}</div></div></div>
+    <dl class="kv">
+      <dt>Status</dt><dd>{{ badge(me.account_status) }}</dd>
+      <dt>Bergabung</dt><dd>{{ me.created_at|dateid }}</dd>
+    </dl>
+    <hr>
+    <h3 style="margin-bottom:.6rem;">Hak akses peran ini</h3>
+    {% if me.role_name == 'super_admin' %}
+      <p class="muted small">Super admin memiliki seluruh hak akses sistem.</p>
+    {% elif role_perms %}
+      <ul style="margin:0;padding-left:1.1rem;" class="small">{% for p in role_perms %}<li style="margin-bottom:.3rem;">{{ p.description }}</li>{% endfor %}</ul>
+    {% else %}
+      <p class="muted small">Belum ada hak akses yang diberikan untuk peran ini.</p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

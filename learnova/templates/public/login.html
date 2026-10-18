@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import field %}
+{% block title %}Masuk · {{ app_name }}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">{% endblock %}
+{% block body %}
+<div class="auth">
+  <aside class="auth-art">
+    <a class="brand" href="{{ url_for('public.landing') }}"><img src="{{ url_for('static', filename='img/logo-icon.png') }}" alt="" width="34" height="34" style="border-radius:9px"><span>{{ app_name }}</span></a>
+    <blockquote>Belajar jadi lebih mudah saat alurnya jelas.</blockquote>
+    <small>{{ cfg.institution }}</small>
+  </aside>
+  <main class="auth-form">
+    <div class="auth-box">
+      {% include "partials/flashes.html" %}
+      <h1>Masuk</h1>
+      <p>Gunakan email dan password akun {{ app_name }} Anda.</p>
+      {% if error %}<div class="alert alert-error" role="alert">{{ icon('x-circle', 18) }}<div>{{ error }}</div></div><div style="height:1rem"></div>{% endif %}
+      <form method="post" novalidate>
+        {{ csrf_input() }}
+        {{ field('Email', 'email', email, 'email', required=True, autocomplete='username', placeholder='nama@kampus.ac.id') }}
+        <div class="field">
+          <label for="f-password">Password <span class="muted" aria-hidden="true">*</span></label>
+          <div class="pw-wrap">
+            <input class="input" id="f-password" name="password" type="password" required autocomplete="current-password">
+            <button class="icon-btn" type="button" data-toggle-password="f-password" aria-label="Tampilkan password">{{ icon('eye', 18) }}</button>
+          </div>
+        </div>
+        <button class="btn primary block" type="submit" style="padding:.85rem;">Masuk</button>
+      </form>
+      <p style="margin-top:1.25rem;" class="muted">Belum punya akun? <a href="{{ url_for('auth.register') }}">Daftar</a></p>
+      {% if show_demo %}
+      <div class="demo-box">
+        <h4>Akun demo (klik untuk mengisi)</h4>
+        <div class="chips">
+          <button type="button" data-fill-email="mahasiswa@learnova.id" data-fill-password="Learnova123">Mahasiswa</button>
+          <button type="button" data-fill-email="dosen@learnova.id" data-fill-password="Learnova123">Dosen</button>
+          <button type="button" data-fill-email="admin@learnova.id" data-fill-password="Learnova123">Admin</button>
+          <button type="button" data-fill-email="superadmin@learnova.id" data-fill-password="Learnova123">Super Admin</button>
+        </div>
+        <p>Password semua akun demo: <span class="code-chip">Learnova123</span></p>
+      </div>
+      {% endif %}
+    </div>
+  </main>
+</div>
+{% endblock %}

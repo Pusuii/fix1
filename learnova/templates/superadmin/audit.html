@@ -1,0 +1,29 @@
+{% extends "app.html" %}
+{% from "_macros.html" import empty, paging %}
+{% block title %}Audit log · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Audit log</h1><p>Jejak tindakan penting di platform. Riwayat tidak dapat diubah dari aplikasi.</p></div></div>
+<form class="filters" method="get">
+  <div class="search-wrap">{{ icon('search', 17) }}<input class="input" type="search" name="q" value="{{ f.q }}" placeholder="Cari detail, nama, atau email" aria-label="Cari audit log"></div>
+  <select class="select" name="action" aria-label="Aksi"><option value="">Semua aksi</option>{% for a in actions %}<option value="{{ a.action }}" {{ 'selected' if f.action == a.action }}>{{ label(a.action) }}</option>{% endfor %}</select>
+  <select class="select" name="actor" aria-label="Pelaku"><option value="">Semua pelaku</option>{% for a in actors %}<option value="{{ a.user_id }}" {{ 'selected' if f.actor == a.user_id|string }}>{{ a.full_name }}</option>{% endfor %}</select>
+  <input class="input" type="date" name="from" value="{{ f['from'] }}" aria-label="Dari tanggal">
+  <input class="input" type="date" name="to" value="{{ f.to }}" aria-label="Sampai tanggal">
+  <button class="btn" type="submit">{{ icon('filter', 15) }} Terapkan</button>
+  {% if f.q or f.action or f.actor or f['from'] or f.to %}<a class="btn ghost" href="{{ url_for('superadmin.audit_log') }}">Atur ulang</a>{% endif %}
+</form>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Waktu</th><th>Pelaku</th><th>Aksi</th><th>Objek</th><th>Detail</th></tr></thead>
+    <tbody>{% for l in rows %}<tr>
+      <td style="white-space:nowrap;">{{ l.created_at|dt }}</td>
+      <td>{% if l.full_name %}<div class="cell-user"><div class="avatar sm">{{ l.full_name|initials }}</div><div><strong>{{ l.full_name }}</strong><span>{{ role_labels[l.role_name] if l.role_name }}</span></div></div>{% else %}<span class="muted">Sistem</span>{% endif %}</td>
+      <td><span class="badge badge-brand">{{ label(l.action) }}</span></td>
+      <td class="muted small">{% if l.target_type %}{{ l.target_type }}{% if l.target_id %} #{{ l.target_id }}{% endif %}{% else %}-{% endif %}</td>
+      <td class="small" style="max-width:380px;overflow-wrap:anywhere;">{{ l.details or '-' }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {{ paging(pager) }}
+  {% else %}{% call empty('scroll', 'Tidak ada catatan', 'Ubah filter untuk melihat catatan lain.') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

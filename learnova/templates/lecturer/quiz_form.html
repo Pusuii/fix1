@@ -1,0 +1,16 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import field %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('lecturer.quizzes', cid=cls.class_id) }}">Kuis</a> {{ icon('chevron-right', 14) }} <span>{{ 'Ubah kuis' if z else 'Kuis baru' }}</span></div>
+<form class="card" method="post" style="max-width:720px;">
+  {{ csrf_input() }}
+  <h2 style="margin-bottom:1.1rem;">{{ 'Ubah kuis' if z else 'Kuis baru' }}</h2>
+  {{ field('Judul kuis', 'title', form.title, error=errors.title, required=True) }}
+  <div class="form-grid">
+    {{ field('Durasi (menit)', 'duration_minutes', form.duration_minutes, 'number', errors.duration_minutes, required=True, extra='min="1" max="300"') }}
+    {{ field('Nilai maksimum', 'max_score', form.max_score, 'number', errors.max_score, required=True, extra='min="1" step="any"') }}
+    <div class="full">{{ field('Tenggat', 'deadline', form.deadline|dtinput, 'datetime-local', errors.deadline, required=True, hint='Mahasiswa tidak bisa memulai kuis setelah tenggat.') }}</div>
+  </div>
+  <div class="form-actions"><button class="btn primary" type="submit">{{ 'Simpan perubahan' if z else 'Buat kuis' }}</button><a class="btn" href="{{ url_for('lecturer.quizzes', cid=cls.class_id) }}">Batal</a></div>
+</form>
+{% endblock %}

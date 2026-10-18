@@ -1,0 +1,33 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import progress, deadline %}
+{% block tab %}
+{% for sess in open_sessions %}
+<div class="alert alert-success" style="align-items:center;margin-bottom:1rem;">
+  <i class="pulse"></i><div style="flex:1;"><strong>Absensi dibuka:</strong> {{ sess.topic }}</div>
+  <a class="btn sm good" href="{{ url_for('student.attendance', cid=cls.class_id) }}">Isi absensi</a>
+</div>
+{% endfor %}
+<div class="grid g4">
+  <a class="stat" href="{{ url_for('student.materials', cid=cls.class_id) }}" style="text-decoration:none;color:inherit;"><div class="ico">{{ icon('book', 21) }}</div><div><div class="num">{{ s.mats_done }}/{{ s.mats_total }}</div><div class="lbl">Materi selesai</div></div></a>
+  <a class="stat" href="{{ url_for('student.assignments', cid=cls.class_id) }}" style="text-decoration:none;color:inherit;"><div class="ico amber">{{ icon('task', 21) }}</div><div><div class="num">{{ pending_tasks|length }}</div><div class="lbl">Tugas menunggu</div></div></a>
+  <a class="stat" href="{{ url_for('student.quizzes', cid=cls.class_id) }}" style="text-decoration:none;color:inherit;"><div class="ico blue">{{ icon('timer', 21) }}</div><div><div class="num">{{ avail_quiz|length }}</div><div class="lbl">Kuis tersedia</div></div></a>
+  <a class="stat" href="{{ url_for('student.progress', cid=cls.class_id) }}" style="text-decoration:none;color:inherit;"><div class="ico leaf">{{ icon('award', 21) }}</div><div><div class="num">{{ s.avg|num if s.avg is not none else '-' }}</div><div class="lbl">Rata-rata nilai (%)</div></div></a>
+</div>
+<div class="split section">
+  <div class="card">
+    <h2 style="margin-bottom:1rem;">Progres belajar</h2>
+    {{ progress(s.mat_pct) }}
+    <p class="muted small" style="margin-top:.6rem;">{{ s.mats_done }} dari {{ s.mats_total }} materi telah diselesaikan.</p>
+    <a class="btn" href="{{ url_for('student.materials', cid=cls.class_id) }}">Lanjutkan materi {{ icon('arrow-right', 16) }}</a>
+  </div>
+  <div class="card flush">
+    <div class="card-head"><h2>Menunggu dikerjakan</h2></div>
+    {% if pending_tasks or avail_quiz %}
+    <div class="list">
+      {% for a in pending_tasks %}<a class="list-row" href="{{ url_for('student.assignment', cid=cls.class_id, aid=a.assignment_id) }}"><div class="ico">{{ icon('task', 19) }}</div><div class="body"><strong>{{ a.title }}</strong>{{ deadline(a.deadline) }}</div></a>{% endfor %}
+      {% for z in avail_quiz %}<a class="list-row" href="{{ url_for('student.quiz', cid=cls.class_id, qid=z.quiz_id) }}"><div class="ico">{{ icon('timer', 19) }}</div><div class="body"><strong>{{ z.title }}</strong>{{ deadline(z.deadline) }}</div></a>{% endfor %}
+    </div>
+    {% else %}<div class="card-pad muted">Tidak ada tugas atau kuis yang menunggu.</div>{% endif %}
+  </div>
+</div>
+{% endblock %}

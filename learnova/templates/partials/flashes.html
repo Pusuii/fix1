@@ -1,0 +1,13 @@
+{% with msgs = get_flashed_messages(with_categories=true) %}
+{% if msgs %}
+<div class="flashes" role="status">
+  {% for cat, msg in msgs %}
+  <div class="alert alert-{{ cat }}">
+    {{ icon({'success': 'check-circle', 'error': 'x-circle', 'danger': 'x-circle', 'warning': 'alert', 'warn': 'alert'}.get(cat, 'info'), 18) }}
+    <div>{{ msg }}</div>
+    <button class="x" type="button" aria-label="Tutup" data-dismiss>{{ icon('x', 16) }}</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}

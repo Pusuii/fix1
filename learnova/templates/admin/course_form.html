@@ -1,0 +1,16 @@
+{% extends "app.html" %}
+{% from "_macros.html" import field, textarea %}
+{% block title %}{{ 'Ubah mata kuliah' if course else 'Mata kuliah baru' }} · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ url_for('admin.courses') }}">Mata kuliah</a> {{ icon('chevron-right', 14) }} <span>{{ 'Ubah' if course else 'Baru' }}</span></div>
+<div class="page-head"><div><h1>{{ 'Ubah mata kuliah' if course else 'Mata kuliah baru' }}</h1></div></div>
+<form class="card" method="post" style="max-width:680px;">
+  {{ csrf_input() }}
+  <div class="form-grid">
+    {{ field('Kode', 'course_code', form.get('course_code'), error=errors.course_code, required=True, placeholder='IF301', hint='Unik, tanpa spasi.') }}
+    {{ field('Nama mata kuliah', 'course_name', form.get('course_name'), error=errors.course_name, required=True) }}
+  </div>
+  {{ textarea('Deskripsi', 'description', form.get('description'), rows=4) }}
+  <div class="form-actions"><button class="btn primary" type="submit">{{ 'Simpan perubahan' if course else 'Tambah mata kuliah' }}</button><a class="btn" href="{{ url_for('admin.courses') }}">Batal</a></div>
+</form>
+{% endblock %}

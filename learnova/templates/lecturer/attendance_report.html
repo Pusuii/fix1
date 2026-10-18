@@ -1,0 +1,18 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import empty, progress %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('lecturer.attendance', cid=cls.class_id) }}">Absensi</a> {{ icon('chevron-right', 14) }} <span>Laporan kehadiran</span></div>
+<div class="card flush">
+  {% if sessions and table %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Mahasiswa</th>{% for s in sessions %}<th title="{{ s.topic }}" style="text-align:center;">{{ s.session_date[5:10]|replace('-', '/') }}</th>{% endfor %}<th class="num">Hadir</th><th style="min-width:150px;">Kehadiran</th></tr></thead>
+    <tbody>{% for r in table %}<tr>
+      <td><strong>{{ r.st.full_name }}</strong></td>
+      {% for c in r.cells %}<td style="text-align:center;">{% if c %}<span class="badge badge-{{ status_info(c)[1] }}" title="{{ c|capitalize }}">{{ c[0]|upper }}</span>{% else %}<span class="muted">-</span>{% endif %}</td>{% endfor %}
+      <td class="num">{{ r.present }}/{{ sessions|length }}</td>
+      <td>{{ progress(r.pct, good=(r.pct or 0) >= 75) }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}{% call empty('chart', 'Belum ada data kehadiran', 'Laporan muncul setelah ada sesi yang berjalan dan peserta kelas.') %}{% endcall %}{% endif %}
+</div>
+<p class="muted small" style="margin-top:.7rem;">H = hadir, I = izin, S = sakit, A = alpa, tanda - = belum mengisi. Kolom tanggal menampilkan hari/bulan sesi.</p>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import field, textarea %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('lecturer.assignments', cid=cls.class_id) }}">Tugas</a> {{ icon('chevron-right', 14) }} <span>{{ 'Ubah tugas' if a else 'Tugas baru' }}</span></div>
+<form class="card" method="post" style="max-width:760px;">
+  {{ csrf_input() }}
+  <h2 style="margin-bottom:1.1rem;">{{ 'Ubah tugas' if a else 'Tugas baru' }}</h2>
+  {{ field('Judul tugas', 'title', form.title, error=errors.title, required=True) }}
+  {{ textarea('Instruksi', 'instructions', form.instructions, rows=6, hint='Jelaskan apa yang harus dikumpulkan, format berkas, dan kriteria penilaian.') }}
+  <div class="form-grid">
+    {{ field('Tenggat', 'deadline', form.deadline|dtinput, 'datetime-local', errors.deadline, required=True, hint='Setelah tenggat, pengumpulan ditutup.') }}
+    {{ field('Nilai maksimum (bobot)', 'max_score', form.max_score, 'number', errors.max_score, required=True, extra='min="1" step="any"') }}
+  </div>
+  <div class="form-actions"><button class="btn primary" type="submit">{{ 'Simpan perubahan' if a else 'Publikasikan tugas' }}</button><a class="btn" href="{{ url_for('lecturer.assignments', cid=cls.class_id) }}">Batal</a></div>
+</form>
+{% endblock %}

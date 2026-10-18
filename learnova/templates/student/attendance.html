@@ -1,0 +1,33 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import progress, empty %}
+{% block tab %}
+<div class="grid g4" style="margin-bottom:1.25rem;">
+  <div class="stat"><div class="ico leaf">{{ icon('check-circle', 21) }}</div><div><div class="num">{{ summary.attendance.get('hadir', 0) }}</div><div class="lbl">Hadir</div></div></div>
+  <div class="stat"><div class="ico blue">{{ icon('mail', 21) }}</div><div><div class="num">{{ summary.attendance.get('izin', 0) }}</div><div class="lbl">Izin</div></div></div>
+  <div class="stat"><div class="ico amber">{{ icon('alert', 21) }}</div><div><div class="num">{{ summary.attendance.get('sakit', 0) }}</div><div class="lbl">Sakit</div></div></div>
+  <div class="stat"><div class="ico">{{ icon('percent', 21) }}</div><div><div class="num">{{ summary.att_pct|round|int if summary.att_pct is not none else '-' }}{{ '%' if summary.att_pct is not none }}</div><div class="lbl">Tingkat kehadiran</div></div></div>
+</div>
+<div class="card flush">
+  {% if sessions %}
+  <div class="list">
+    {% for x in sessions %}
+    <div class="list-row" style="flex-wrap:wrap;">
+      <div class="ico {{ 'done' if x.state == 'hadir' }}">{{ icon('attendance', 19) }}</div>
+      <div class="body"><strong>{{ x.s.topic }}</strong><span>{{ x.s.session_date|dt }}{% if x.s.recorded_at %} · tercatat {{ x.s.recorded_at|dt }}{% endif %}</span></div>
+      {% if x.state == 'terbuka' %}
+        <form method="post" action="{{ url_for('student.check_in', cid=cls.class_id, sid=x.s.session_id) }}" class="row">
+          {{ csrf_input() }}<i class="pulse"></i>
+          <button class="btn sm good" name="status" value="hadir" type="submit" data-keep>{{ icon('check', 15) }} Hadir</button>
+          <button class="btn sm" name="status" value="izin" type="submit" data-keep>Izin</button>
+          <button class="btn sm" name="status" value="sakit" type="submit" data-keep>Sakit</button>
+        </form>
+      {% else %}
+        {{ badge(x.state, 'Belum dibuka' if x.state == 'tertutup' else None) }}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}{% call empty('attendance', 'Belum ada sesi perkuliahan', 'Sesi dan absensi akan muncul setelah dosen membuatnya.') %}{% endcall %}{% endif %}
+</div>
+<p class="muted small" style="margin-top:.8rem;">Absensi hanya bisa diisi saat dosen membuka sesi. Anda dapat mengubah pilihan selama absensi masih dibuka.</p>
+{% endblock %}

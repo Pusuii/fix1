@@ -1,0 +1,22 @@
+{% extends "class_base.html" %}
+{% block tab %}
+<div class="timer" data-deadline-ts="{{ end_ts }}" data-now-ts="{{ now_ts }}" role="timer" aria-live="off">{{ icon('timer', 18) }}<span data-timer-text>--:--</span></div>
+<h2 style="margin-bottom:1rem;">{{ quiz.title }}</h2>
+<form method="post" id="quiz-form" data-confirm="Kirim semua jawaban sekarang? Jawaban tidak bisa diubah setelah dikirim.">
+  {{ csrf_input() }}
+  {% for qu in questions %}
+  <fieldset class="q-card" style="border:1px solid var(--line);margin:0 0 1rem;">
+    <div class="q-no">Soal {{ loop.index }} · {{ qu.points|num }} poin</div>
+    <div class="q-text">{{ qu.question_text }}</div>
+    {% if qu.question_type == 'pilihan_ganda' %}
+      {% for o in options.get(qu.question_id, []) %}
+      <label class="opt"><input type="radio" name="q{{ qu.question_id }}" value="{{ o.option_id }}"> <span>{{ o.option_text }}</span></label>
+      {% endfor %}
+    {% else %}
+      <textarea class="textarea" name="q{{ qu.question_id }}" rows="5" placeholder="Tulis jawaban Anda"></textarea>
+    {% endif %}
+  </fieldset>
+  {% endfor %}
+  <button class="btn primary" type="submit" style="padding:.9rem 1.4rem;" data-keep>{{ icon('send', 16) }} Kirim jawaban</button>
+</form>
+{% endblock %}

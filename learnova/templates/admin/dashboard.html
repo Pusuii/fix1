@@ -1,0 +1,45 @@
+{% extends "app.html" %}
+{% from "_macros.html" import stat, empty %}
+{% block title %}Beranda admin · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Halo, {{ me.full_name.split()[0] }}</h1><p>Ringkasan akun, kelas, dan laporan yang perlu ditindaklanjuti.</p></div></div>
+<div class="grid g4">
+  {% if has_perm('account.verify') or has_perm('account.manage') %}<a class="stat" style="text-decoration:none;color:inherit;" href="{{ url_for('admin.accounts', status='pending') }}"><div class="ico amber">{{ icon('user-check', 21) }}</div><div><div class="num">{{ counts.pending }}</div><div class="lbl">Akun menunggu verifikasi</div></div></a>{% endif %}
+  {{ stat('users', counts.students + counts.lecturers, 'Mahasiswa dan dosen') }}
+  {{ stat('book', counts.classes, 'Kelas aktif', 'blue') }}
+  {% if has_perm('report.handle') %}<a class="stat" style="text-decoration:none;color:inherit;" href="{{ url_for('admin.reports') }}"><div class="ico red">{{ icon('flag', 21) }}</div><div><div class="num">{{ counts.reports_open }}</div><div class="lbl">Laporan belum selesai</div></div></a>{% else %}{{ stat('flag', counts.reports_open, 'Laporan belum selesai', 'red') }}{% endif %}
+</div>
+<div class="split section">
+  <div>
+    <div class="section-head"><h2>Menunggu verifikasi</h2>{% if has_perm('account.manage') %}<a href="{{ url_for('admin.accounts', status='pending') }}">Lihat semua</a>{% endif %}</div>
+    <div class="card flush">
+      {% if pending %}
+      <div class="list">{% for u in pending %}
+        <a class="list-row" href="{{ url_for('admin.account_detail', uid=u.user_id) }}">
+          <div class="avatar sm">{{ u.full_name|initials }}</div>
+          <div class="body"><strong>{{ u.full_name }}</strong><span>{{ u.email }} · {{ role_labels[u.role_name] }} · daftar {{ u.created_at|rel }}</span></div>
+          <span class="btn sm">Periksa</span>
+        </a>{% endfor %}</div>
+      {% else %}{% call empty('user-check', 'Tidak ada akun yang menunggu', 'Pendaftaran baru akan muncul di sini.') %}{% endcall %}{% endif %}
+    </div>
+  </div>
+  <div>
+    <div class="section-head"><h2>Laporan terbaru</h2></div>
+    <div class="card flush">
+      {% if reports %}
+      <div class="list">{% for r in reports %}
+        <a class="list-row" href="{{ url_for('admin.report_detail', rid=r.report_id) }}">
+          <div class="body"><strong>{{ r.subject }}</strong><span>{{ r.full_name }} · {{ r.created_at|rel }}</span></div>{{ badge(r.status) }}
+        </a>{% endfor %}</div>
+      {% else %}{% call empty('check-circle', 'Semua laporan tertangani') %}{% endcall %}{% endif %}
+    </div>
+  </div>
+</div>
+<div class="section">
+  <div class="section-head"><h2>Aktivitas terbaru</h2>{% if has_perm('platform.monitor') %}<a href="{{ url_for('admin.activity') }}">Aktivitas platform</a>{% endif %}</div>
+  <div class="card flush"><div class="list">
+    {% for l in recent %}<div class="list-row"><div class="ico">{{ icon('activity', 18) }}</div><div class="body"><strong>{{ label(l.action) }}</strong><span>{{ l.full_name or 'Sistem' }} · {{ l.details or '' }}</span></div><span class="muted small">{{ l.created_at|rel }}</span></div>
+    {% else %}<div class="card-pad muted">Belum ada aktivitas.</div>{% endfor %}
+  </div></div>
+</div>
+{% endblock %}

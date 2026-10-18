@@ -1,0 +1,49 @@
+{% extends "app.html" %}
+{% from "_macros.html" import progress, empty %}
+{% block title %}Kelas saya · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Kelas saya</h1><p>Pilih kelas untuk membuka materi, tugas, kuis, absensi, dan nilai.</p></div></div>
+{% if cards %}
+<div class="grid g3">
+  {% for x in cards %}
+  <a class="card class-card" href="{{ url_for('student.class_home', cid=x.c.class_id) }}">
+    <div class="row between"><span class="code">{{ x.c.course_code }}</span>{{ badge(x.c.status) }}</div>
+    <div><h3>{{ x.c.class_name }}</h3><div class="muted small">{{ x.c.course_name }}</div></div>
+    <div class="meta"><span>{{ icon('user', 15) }} {{ x.c.lecturer_name }}</span><span>{{ icon('calendar', 15) }} {{ x.c.semester }} {{ x.c.academic_year }}</span></div>
+    <div>
+      <div class="row between small" style="margin-bottom:.35rem;"><span class="muted">Progres materi</span><span class="muted">{{ x.s.mats_done }}/{{ x.s.mats_total }}</span></div>
+      {{ progress(x.s.mat_pct, label=False) }}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">{% call empty('book', 'Anda belum tergabung di kelas mana pun', 'Pilih salah satu kelas di bawah, atau minta admin mendaftarkan Anda.') %}{% endcall %}</div>
+{% endif %}
+
+<div class="section">
+  <div class="section-head"><h2>Kelas yang tersedia</h2></div>
+  {% if available %}
+  <div class="card flush table-wrap">
+    <table class="table">
+      <thead><tr><th>Kelas</th><th>Dosen</th><th>Semester</th><th class="num">Peserta</th><th></th></tr></thead>
+      <tbody>
+      {% for c in available %}
+        <tr>
+          <td><strong>{{ c.class_name }}</strong><div class="muted small">{{ c.course_code }} · {{ c.course_name }}</div></td>
+          <td>{{ c.lecturer_name }}</td>
+          <td>{{ c.semester }} {{ c.academic_year }}</td>
+          <td class="num">{{ c.students }}</td>
+          <td class="actions">
+            <form class="inline" method="post" action="{{ url_for('student.join', cid=c.class_id) }}">{{ csrf_input() }}<button class="btn sm primary" type="submit">{{ icon('plus', 15) }} Gabung</button></form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card muted">Tidak ada kelas lain yang membuka pendaftaran saat ini.</div>
+  {% endif %}
+</div>
+{% endblock %}

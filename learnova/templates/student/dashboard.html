@@ -1,0 +1,67 @@
+{% extends "app.html" %}
+{% from "_macros.html" import stat, progress, empty, deadline %}
+{% block title %}Beranda · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Halo, {{ me.full_name.split()[0] }}</h1><p>{{ now_dt()|dayid }}. Berikut yang perlu Anda perhatikan hari ini.</p></div>
+  <div class="actions"><a class="btn primary" href="{{ url_for('student.classes') }}">{{ icon('book', 17) }} Kelas saya</a></div>
+</div>
+
+{% if open_sessions %}
+<div class="stack" style="margin-bottom:1.25rem;">
+{% for o in open_sessions %}
+  <div class="alert alert-success" style="align-items:center;">
+    <i class="pulse"></i>
+    <div style="flex:1;"><strong>Absensi dibuka:</strong> {{ o.class.class_name }} · {{ o.sess.topic }}</div>
+    <a class="btn sm good" href="{{ url_for('student.attendance', cid=o.class.class_id) }}">Isi absensi</a>
+  </div>
+{% endfor %}
+</div>
+{% endif %}
+
+<div class="grid g4">
+  {{ stat('book', stats.classes, 'Kelas aktif') }}
+  {{ stat('task', stats.todo, 'Menunggu dikerjakan', 'amber') }}
+  {{ stat('attendance', (stats.att ~ '%') if stats.att is not none else '-', 'Kehadiran', 'leaf') }}
+  {{ stat('award', stats.avg if stats.avg is not none else '-', 'Rata-rata nilai (%)', 'blue') }}
+</div>
+
+<div class="split section">
+  <div>
+    <div class="section-head"><h2>Lanjutkan belajar</h2><a href="{{ url_for('student.classes') }}">Semua kelas</a></div>
+    {% if classes %}
+    <div class="grid g2">
+      {% for x in classes %}
+      <a class="card class-card" href="{{ url_for('student.class_home', cid=x.c.class_id) }}">
+        <div class="row between"><span class="code">{{ x.c.course_code }}</span><span class="muted small">{{ x.c.semester }} {{ x.c.academic_year }}</span></div>
+        <div><h3>{{ x.c.class_name }}</h3><div class="muted small">{{ x.c.lecturer_name }}</div></div>
+        <div>
+          <div class="row between small" style="margin-bottom:.35rem;"><span class="muted">Progres materi</span><span class="muted">{{ x.s.mats_done }}/{{ x.s.mats_total }}</span></div>
+          {{ progress(x.s.mat_pct, label=False) }}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">{% from "_macros.html" import empty %}{% call empty('book', 'Belum ada kelas', 'Gabung ke kelas yang tersedia untuk mulai belajar.') %}<a class="btn primary" href="{{ url_for('student.classes') }}">Jelajahi kelas</a>{% endcall %}</div>
+    {% endif %}
+  </div>
+  <div>
+    <div class="section-head"><h2>Tenggat terdekat</h2></div>
+    <div class="card flush">
+      {% if todo %}
+      <div class="list">
+        {% for t in todo %}
+        <a class="list-row" href="{{ t.url }}">
+          <div class="ico">{{ icon('task' if t.kind == 'tugas' else 'timer', 19) }}</div>
+          <div class="body"><strong>{{ t.title }}</strong><span>{{ t.class }}</span><div>{{ deadline(t.when) }}</div></div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+        {% call empty('check-circle', 'Semua beres', 'Tidak ada tugas atau kuis yang menunggu.') %}{% endcall %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

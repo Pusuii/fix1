@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}{{ app_name }} - Platform pembelajaran untuk kelas, tugas, kuis, dan absensi{% endblock %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">{% endblock %}
+{% block bodyclass %}pub{% endblock %}
+{% block body %}
+<header class="pub-nav">
+  <div class="wrap">
+    <a class="brand" href="{{ url_for('public.landing') }}">
+      <img src="{{ url_for('static', filename='img/logo-icon.png') }}" alt="" width="34" height="34"><span>{{ app_name }}</span>
+    </a>
+    <nav class="pub-links" aria-label="Navigasi halaman">
+      <a href="#fitur">Fitur</a><a href="#peran">Peran</a><a href="#alur">Alur belajar</a><a href="#faq">Tanya jawab</a>
+    </nav>
+    <div class="pub-cta">
+      {% if g.user %}
+        <a class="btn primary" href="{{ url_for('auth.dashboard') }}">Buka beranda</a>
+      {% else %}
+        <a class="btn ghost" href="{{ url_for('auth.login') }}">Masuk</a>
+        <a class="btn primary" href="{{ url_for('auth.register') }}">Daftar</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <h1>Kelas, tugas, dan kuis dalam satu alur belajar.</h1>
+      <p class="lead">{{ app_name }} membantu dosen mengatur pembelajaran dan membantu mahasiswa tahu persis apa yang harus dikerjakan hari ini, dari materi pertama sampai nilai akhir.</p>
+      <div class="row">
+        {% if g.user %}
+          <a class="btn light" href="{{ url_for('auth.dashboard') }}">Buka beranda {{ icon('arrow-right', 18) }}</a>
+        {% else %}
+          <a class="btn light" href="{{ url_for('auth.register') }}">Buat akun gratis</a>
+          <a class="btn outline" href="{{ url_for('auth.login') }}">Masuk</a>
+        {% endif %}
+      </div>
+      <div class="hero-tags" aria-label="Fitur utama">
+        <span>Materi berurutan</span><span>Kuis berwaktu</span><span>Absensi per sesi</span><span>Nilai transparan</span>
+      </div>
+    </div>
+
+    <div class="mock-stage" aria-hidden="true">
+      <div class="mock">
+        <div class="mock-top">
+          <span class="mock-code">IF301</span>
+          <span class="badge badge-ok"><i class="pulse"></i> Absensi dibuka</span>
+        </div>
+        <h3>Pemrograman Web - Kelas A</h3>
+        <div class="by">Dr. Budi Santoso, M.Kom.</div>
+        <div class="prog-label"><span>Progres materi</span><span>3 dari 6 selesai</span></div>
+        <div class="progress lg"><i></i></div>
+        <ul class="mock-list">
+          <li><span class="dot">{{ icon('check', 14) }}</span>HTML Semantik &amp; Aksesibilitas</li>
+          <li><span class="dot">{{ icon('check', 14) }}</span>CSS Layout: Flexbox &amp; Grid</li>
+          <li class="now"><span class="dot">{{ icon('play', 12) }}</span>Dokumentasi MDN: JavaScript <em>Lanjutkan</em></li>
+          <li class="lock"><span class="dot">{{ icon('lock', 13) }}</span>Manipulasi DOM &amp; Event</li>
+        </ul>
+        <div class="mock-foot">
+          <span>{{ icon('task', 15) }} Tugas 3 · 6 hari lagi</span>
+          <span>{{ icon('timer', 15) }} Kuis 1 · 20 menit</span>
+        </div>
+      </div>
+      <div class="mock-grade">
+        <div class="leafmark"><img src="{{ url_for('static', filename='img/logo-white.png') }}" alt=""></div>
+        <div><b>92 / 100</b><small>Tugas 1 sudah dinilai</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="fitur">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Semua yang terjadi di kelas, tercatat di satu tempat.</h2>
+      <p>Tidak ada lagi tugas yang tercecer di grup chat atau absensi di kertas. Setiap kegiatan punya tempat, tenggat, dan hasil yang bisa dilihat.</p>
+    </div>
+    <div class="caps">
+      <div class="cap">{{ icon('route', 28) }}<h3>Materi berurutan dengan prasyarat</h3><p>Dosen menentukan urutan dan prasyarat. Materi berikutnya terbuka setelah materi sebelumnya ditandai selesai.</p></div>
+      <div class="cap">{{ icon('upload', 28) }}<h3>Tugas dengan tenggat jelas</h3><p>Unggah berkas sebelum tenggat, lihat status pengumpulan, lalu terima nilai dan umpan balik dari dosen.</p></div>
+      <div class="cap">{{ icon('timer', 28) }}<h3>Kuis berwaktu</h3><p>Pilihan ganda dinilai otomatis. Jawaban esai dinilai dosen, dan skor diperbarui begitu penilaian selesai.</p></div>
+      <div class="cap">{{ icon('attendance', 28) }}<h3>Absensi per sesi</h3><p>Dosen membuka absensi saat sesi berlangsung dan menutupnya sesudahnya. Rekap kehadiran terhitung otomatis.</p></div>
+      <div class="cap">{{ icon('trend', 28) }}<h3>Progres dan nilai</h3><p>Mahasiswa melihat kemajuan belajar dan nilai kapan saja. Dosen memantau seluruh kelas dalam satu tabel.</p></div>
+      <div class="cap">{{ icon('shield-check', 28) }}<h3>Hak akses dan jejak audit</h3><p>Role dan izin diatur super admin, dan setiap tindakan penting tercatat di audit log.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec tint" id="peran">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Empat peran, masing-masing dengan ruang kerjanya.</h2>
+      <p>Setiap pengguna melihat hanya yang relevan dengan tugasnya.</p>
+    </div>
+    <div class="roles" id="roles">
+      <div class="role-tabs" role="tablist" aria-label="Pilih peran">
+        <button class="role-tab" role="tab" aria-selected="true" aria-controls="rp-0" id="rt-0"><strong>Mahasiswa</strong><span>Belajar, mengumpulkan, dan memantau nilai</span></button>
+        <button class="role-tab" role="tab" aria-selected="false" aria-controls="rp-1" id="rt-1"><strong>Dosen</strong><span>Mengajar dan menilai</span></button>
+        <button class="role-tab" role="tab" aria-selected="false" aria-controls="rp-2" id="rt-2"><strong>Admin</strong><span>Mengelola akun dan data akademik</span></button>
+        <button class="role-tab" role="tab" aria-selected="false" aria-controls="rp-3" id="rt-3"><strong>Super Admin</strong><span>Mengatur sistem dan hak akses</span></button>
+      </div>
+      <div>
+        <div class="role-panel" id="rp-0" role="tabpanel" aria-labelledby="rt-0">
+          <h3>Tahu apa yang harus dikerjakan hari ini</h3>
+          <p>Beranda mahasiswa merangkum kelas, tenggat terdekat, dan absensi yang sedang dibuka.</p>
+          <ul>
+            <li>{{ icon('check-circle', 18) }}Melihat dashboard dan kelas</li>
+            <li>{{ icon('check-circle', 18) }}Mengakses dan mengunduh materi</li>
+            <li>{{ icon('check-circle', 18) }}Mengumpulkan tugas</li>
+            <li>{{ icon('check-circle', 18) }}Mengerjakan kuis</li>
+            <li>{{ icon('check-circle', 18) }}Melakukan absensi</li>
+            <li>{{ icon('check-circle', 18) }}Melihat nilai dan progres</li>
+          </ul>
+        </div>
+        <div class="role-panel" id="rp-1" role="tabpanel" aria-labelledby="rt-1">
+          <h3>Mengajar tanpa tumpukan berkas</h3>
+          <p>Satu halaman kelas untuk materi, tugas, kuis, absensi, dan progres seluruh mahasiswa.</p>
+          <ul>
+            <li>{{ icon('check-circle', 18) }}Membuat dan mengelola kelas</li>
+            <li>{{ icon('check-circle', 18) }}Mengunggah materi dan prasyarat</li>
+            <li>{{ icon('check-circle', 18) }}Membuat tugas dan kuis</li>
+            <li>{{ icon('check-circle', 18) }}Memeriksa pengumpulan tugas</li>
+            <li>{{ icon('check-circle', 18) }}Memberikan nilai dan umpan balik</li>
+            <li>{{ icon('check-circle', 18) }}Memantau progres mahasiswa</li>
+          </ul>
+        </div>
+        <div class="role-panel" id="rp-2" role="tabpanel" aria-labelledby="rt-2">
+          <h3>Akademik berjalan, kendala cepat teratasi</h3>
+          <p>Admin memverifikasi akun baru, merapikan data kelas, dan menindaklanjuti laporan pengguna.</p>
+          <ul>
+            <li>{{ icon('check-circle', 18) }}Mengelola akun mahasiswa dan dosen</li>
+            <li>{{ icon('check-circle', 18) }}Memverifikasi atau mengaktifkan akun</li>
+            <li>{{ icon('check-circle', 18) }}Mengelola kelas dan mata kuliah</li>
+            <li>{{ icon('check-circle', 18) }}Menangani laporan dan kendala</li>
+            <li>{{ icon('check-circle', 18) }}Memantau aktivitas platform</li>
+          </ul>
+        </div>
+        <div class="role-panel" id="rp-3" role="tabpanel" aria-labelledby="rt-3">
+          <h3>Kendali penuh, dengan jejak yang bisa diperiksa</h3>
+          <p>Super admin menentukan siapa boleh melakukan apa, dan melihat siapa melakukan apa.</p>
+          <ul>
+            <li>{{ icon('check-circle', 18) }}Mengelola akun admin</li>
+            <li>{{ icon('check-circle', 18) }}Mengatur role dan hak akses</li>
+            <li>{{ icon('check-circle', 18) }}Mengelola konfigurasi sistem</li>
+            <li>{{ icon('check-circle', 18) }}Melihat statistik keseluruhan</li>
+            <li>{{ icon('check-circle', 18) }}Melihat audit log</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="alur">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>Dari mendaftar sampai nilai akhir, lima langkah.</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><h3>Daftar dan diverifikasi</h3><p>Buat akun mahasiswa atau dosen. Admin memeriksa data lalu mengaktifkan akun.</p></div>
+      <div class="step"><h3>Masuk ke kelas</h3><p>Pilih kelas yang tersedia atau didaftarkan oleh admin.</p></div>
+      <div class="step"><h3>Belajar berurutan</h3><p>Buka materi sesuai urutan, tandai selesai, dan ikuti absensi tiap sesi.</p></div>
+      <div class="step"><h3>Kumpulkan dan uji</h3><p>Unggah tugas sebelum tenggat dan kerjakan kuis dalam batas waktu.</p></div>
+      <div class="step"><h3>Terima nilai</h3><p>Lihat nilai, umpan balik, dan progres belajar di satu halaman.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec tint" id="faq">
+  <div class="wrap">
+    <div class="sec-head"><h2>Pertanyaan yang sering diajukan</h2></div>
+    <div class="faq">
+      <details><summary>Siapa yang bisa membuat akun? {{ icon('chevron-down', 20) }}</summary><p>Mahasiswa dan dosen dapat mendaftar sendiri. Akun baru berstatus menunggu sampai admin memverifikasinya. Akun admin dibuat oleh super admin.</p></details>
+      <details><summary>Apakah tugas masih bisa dikumpulkan setelah tenggat? {{ icon('chevron-down', 20) }}</summary><p>Tidak. Setelah tenggat lewat, pengumpulan ditutup dan statusnya tampil sebagai terlambat. Sebelum tenggat, berkas boleh diganti.</p></details>
+      <details><summary>Bagaimana kuis dinilai? {{ icon('chevron-down', 20) }}</summary><p>Soal pilihan ganda dinilai otomatis begitu kuis dikirim. Soal esai dinilai dosen, dan nilai akhir muncul setelah semua jawaban esai dinilai.</p></details>
+      <details><summary>Berkas apa saja yang bisa diunggah? {{ icon('chevron-down', 20) }}</summary><p>Dokumen (PDF, Word, PowerPoint, Excel), gambar, arsip, dan beberapa berkas kode. Ukuran maksimum diatur oleh super admin.</p></details>
+      <details><summary>Siapa yang dapat melihat nilai saya? {{ icon('chevron-down', 20) }}</summary><p>Nilai Anda hanya terlihat oleh Anda, dosen pengampu kelas, dan admin platform.</p></details>
+      <details><summary>Bagaimana jika menemukan kendala? {{ icon('chevron-down', 20) }}</summary><p>Setelah masuk, buka menu Bantuan &amp; laporan, tulis masalahnya, dan pantau statusnya sampai selesai ditangani admin.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="wrap">
+    <h2>Mulai dari satu kelas, rapikan seluruh semester.</h2>
+    <p>Buat akun dan minta admin mengaktifkannya. Kelas pertama Anda bisa berjalan hari ini.</p>
+    <div class="row">
+      {% if g.user %}
+        <a class="btn light" style="background:#fff;color:var(--violet-700);" href="{{ url_for('auth.dashboard') }}">Buka beranda</a>
+      {% else %}
+        <a class="btn primary" style="padding:.95rem 1.4rem;" href="{{ url_for('auth.register') }}">Buat akun</a>
+        <a class="btn" style="padding:.95rem 1.4rem;background:transparent;color:#fff;border-color:rgba(255,255,255,.4);" href="{{ url_for('auth.login') }}">Masuk</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div>
+      <a class="brand" href="{{ url_for('public.landing') }}"><img src="{{ url_for('static', filename='img/logo-icon.png') }}" alt="" width="34" height="34"><span>{{ app_name }}</span></a>
+      <div>{{ cfg.institution }}</div>
+      <div>{{ cfg.support_email }}</div>
+    </div>
+    <div class="foot-links">
+      <a href="#fitur">Fitur</a><a href="#peran">Peran</a><a href="#alur">Alur belajar</a><a href="#faq">Tanya jawab</a><a href="{{ url_for('auth.login') }}">Masuk</a>
+    </div>
+    <div>© {{ now_dt().year }} {{ app_name }}</div>
+  </div>
+</footer>
+{% endblock %}
+{% block scripts %}
+<script>
+(function () {
+  var tabs = document.querySelectorAll('.role-tab'), panels = document.querySelectorAll('.role-panel');
+  if (!tabs.length) return;
+  document.documentElement.classList.add('js');
+  panels.forEach(function (p, i) { p.hidden = i !== 0; });
+  tabs.forEach(function (tab, i) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t, j) { t.setAttribute('aria-selected', i === j ? 'true' : 'false'); panels[j].hidden = i !== j; });
+    });
+    tab.addEventListener('keydown', function (e) {
+      var n = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : (e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0);
+      if (n) { e.preventDefault(); var t = tabs[(i + n + tabs.length) % tabs.length]; t.focus(); t.click(); }
+    });
+  });
+})();
+</script>
+{% endblock %}

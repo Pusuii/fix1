@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="Menu utama">
+    <a class="brand" href="{{ url_for('auth.dashboard') }}">
+      <img src="{{ url_for('static', filename='img/logo-icon.png') }}" alt="" width="34" height="34">
+      <span>{{ app_name }}</span>
+    </a>
+    <nav>
+      {% for grp in nav %}
+      <div class="nav-group">
+        <div class="nav-title">{{ grp.title }}</div>
+        {% for it in grp['items'] %}
+        <a class="nav-link {{ 'active' if nav_active(it.prefix) }}" href="{{ it.url }}" {% if nav_active(it.prefix) %}aria-current="page"{% endif %}>
+          {{ icon(it.icon, 19) }} {{ it.label }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </nav>
+    <div class="sidebar-foot">
+      <div class="user-card">
+        <div class="avatar">{{ me.full_name|initials }}</div>
+        <div class="who"><strong>{{ me.full_name }}</strong><span>{{ role_labels[me.role_name] }}</span></div>
+        <form method="post" action="{{ url_for('auth.logout') }}">
+          {{ csrf_input() }}
+          <button class="icon-btn" type="submit" title="Keluar" aria-label="Keluar">{{ icon('logout', 19) }}</button>
+        </form>
+      </div>
+    </div>
+  </aside>
+  <div class="scrim" data-nav-close></div>
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" type="button" data-nav-toggle aria-label="Buka menu" aria-controls="sidebar">{{ icon('menu', 22) }}</button>
+      <a class="brand" href="{{ url_for('auth.dashboard') }}"><img src="{{ url_for('static', filename='img/logo-icon.png') }}" alt=""><span>{{ app_name }}</span></a>
+    </header>
+    <main class="content" id="main">
+      {% include "partials/flashes.html" %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

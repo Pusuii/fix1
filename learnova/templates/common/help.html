@@ -1,0 +1,37 @@
+{% extends "app.html" %}
+{% from "_macros.html" import field, textarea, empty %}
+{% block title %}Bantuan & laporan · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Bantuan &amp; laporan</h1><p>Ada kendala saat memakai {{ app_name }}? Tulis di sini. Admin akan menanggapi, dan Anda bisa memantau statusnya.</p></div></div>
+<div class="split">
+  <section class="card flush">
+    <div class="card-head"><h2>Laporan saya</h2><span class="muted small">{{ reports|length }} laporan</span></div>
+    {% if reports %}
+    <div class="list">
+      {% for r in reports %}
+      <div class="list-row" style="align-items:flex-start;">
+        <div class="body">
+          <strong>{{ r.subject }}</strong>
+          <span>{{ r.created_at|dt }}</span>
+          <p style="margin:.5rem 0 0;white-space:pre-wrap;">{{ r.description }}</p>
+          {% if r.response %}<div class="alert alert-info" style="margin-top:.7rem;">{{ icon('message', 17) }}<div><strong>Tanggapan{% if r.handler %} ({{ r.handler }}){% endif %}:</strong> {{ r.response }}</div></div>{% endif %}
+        </div>
+        {{ badge(r.status) }}
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+      {% call empty('help', 'Belum ada laporan', 'Laporan yang Anda kirim akan muncul di sini beserta statusnya.') %}{% endcall %}
+    {% endif %}
+  </section>
+  <section class="card">
+    <h2 style="margin-bottom:1rem;">Kirim laporan baru</h2>
+    <form method="post">
+      {{ csrf_input() }}
+      {{ field('Ringkasan masalah', 'subject', form.get('subject'), error=errors.subject, required=True, placeholder='Contoh: Tugas tidak bisa diunggah') }}
+      {{ textarea('Ceritakan masalahnya', 'description', form.get('description'), error=errors.description, required=True, hint='Sebutkan halaman, kelas, dan langkah yang Anda lakukan.') }}
+      <button class="btn primary" type="submit">{{ icon('send', 16) }} Kirim laporan</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends "app.html" %}
+{% block title %}{{ u.full_name }} · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ url_for('admin.accounts') }}">Akun pengguna</a> {{ icon('chevron-right', 14) }} <span>{{ u.full_name }}</span></div>
+<div class="page-head">
+  <div class="row" style="gap:1rem;"><div class="avatar" style="width:56px;height:56px;font-size:1.1rem;">{{ u.full_name|initials }}</div><div><h1 style="font-size:1.6rem;">{{ u.full_name }}</h1><div class="muted">{{ u.email }}</div></div></div>
+  <div class="actions"><a class="btn" href="{{ url_for('admin.account_edit', uid=u.user_id) }}">{{ icon('edit', 16) }} Ubah data</a></div>
+</div>
+{% if u.account_status == 'pending' and has_perm('account.verify') %}
+<section class="card" style="border-color:#f1d79b;background:#fffaf0;margin-bottom:1.25rem;">
+  <h2 style="margin-bottom:.4rem;">Verifikasi akun</h2>
+  <p class="muted">Periksa kesesuaian data di bawah (nama, email, dan peran). Aktifkan bila sesuai, atau tolak dengan alasan bila data perlu diperbaiki.</p>
+  <div class="row" style="align-items:flex-start;gap:1.5rem;">
+    <form method="post" action="{{ url_for('admin.account_verify', uid=u.user_id) }}">{{ csrf_input() }}<input type="hidden" name="decision" value="aktifkan"><button class="btn good" type="submit">{{ icon('check', 17) }} Data sesuai, aktifkan akun</button></form>
+    <form method="post" action="{{ url_for('admin.account_verify', uid=u.user_id) }}" class="row" style="flex:1;min-width:280px;align-items:flex-start;" data-confirm="Tolak pendaftaran ini?">
+      {{ csrf_input() }}<input type="hidden" name="decision" value="tolak">
+      <div style="flex:1;min-width:200px;"><label class="sr-only" for="reason">Alasan penolakan</label><input class="input" id="reason" name="reason" minlength="5" required placeholder="Alasan penolakan atau data yang perlu diperbaiki"></div>
+      <button class="btn danger" type="submit">{{ icon('x', 16) }} Tolak</button>
+    </form>
+  </div>
+</section>
+{% endif %}
+<div class="split">
+  <div class="stack">
+    <section class="card">
+      <h2 style="margin-bottom:1rem;">Data akun</h2>
+      <dl class="kv">
+        <dt>Nama lengkap</dt><dd>{{ u.full_name }}</dd>
+        <dt>Email</dt><dd>{{ u.email }}</dd>
+        <dt>Peran</dt><dd>{{ role_labels[u.role_name] }}</dd>
+        <dt>Status</dt><dd>{{ badge(u.account_status) }}</dd>
+        <dt>Terdaftar</dt><dd>{{ u.created_at|dt }}</dd>
+      </dl>
+      {% if u.account_status in ('aktif', 'nonaktif') %}
+      <hr>
+      <form method="post" action="{{ url_for('admin.account_status', uid=u.user_id) }}" {% if u.account_status == 'aktif' %}data-confirm="Nonaktifkan akun ini?"{% endif %}>
+        {{ csrf_input() }}<input type="hidden" name="next" value="{{ request.path }}">
+        {% if u.account_status == 'aktif' %}<button class="btn danger" name="status" value="nonaktif" type="submit">Nonaktifkan akun</button>
+        {% else %}<button class="btn good" name="status" value="aktif" type="submit">Aktifkan akun</button>{% endif %}
+      </form>
+      {% elif u.account_status == 'ditolak' %}
+      <hr><form method="post" action="{{ url_for('admin.account_verify', uid=u.user_id) }}">{{ csrf_input() }}<input type="hidden" name="decision" value="aktifkan"><button class="btn good" type="submit">Aktifkan setelah data diperbaiki</button></form>
+      {% endif %}
+    </section>
+    <section class="card flush">
+      <div class="card-head"><h2>{{ 'Kelas yang diikuti' if u.role_name == 'mahasiswa' else 'Kelas yang diampu' }}</h2></div>
+      {% if classes %}<div class="list">{% for c in classes %}<a class="list-row" href="{{ url_for('admin.class_detail', cid=c.class_id) }}"><div class="body"><strong>{{ c.class_name }}</strong><span>{{ c.enrolled_at }}</span></div>{{ badge(c.status) }}</a>{% endfor %}</div>
+      {% else %}<div class="card-pad muted">Belum ada kelas.</div>{% endif %}
+    </section>
+  </div>
+  <section class="card flush">
+    <div class="card-head"><h2>Aktivitas terakhir</h2></div>
+    {% if logs %}<div class="list">{% for l in logs %}<div class="list-row"><div class="body"><strong>{{ label(l.action) }}</strong><span>{{ l.created_at|dt }}</span></div></div>{% endfor %}</div>
+    {% else %}<div class="card-pad muted">Belum ada aktivitas tercatat.</div>{% endif %}
+  </section>
+</div>
+{% endblock %}

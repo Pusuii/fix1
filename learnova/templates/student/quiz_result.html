@@ -1,0 +1,35 @@
+{% extends "class_base.html" %}
+{% block tab %}
+<div class="crumbs"><a href="{{ url_for('student.quizzes', cid=cls.class_id) }}">Kuis</a> {{ icon('chevron-right', 14) }} <a href="{{ url_for('student.quiz', cid=cls.class_id, qid=quiz.quiz_id) }}">{{ quiz.title }}</a> {{ icon('chevron-right', 14) }} <span>Percobaan {{ att.attempt_no }}</span></div>
+<section class="card row" style="gap:1.75rem;margin-bottom:1.25rem;">
+  {% if att.score is not none %}
+  <div class="score-ring" style="--p: {{ pct|round|int }}"><b>{{ att.score|num }}</b></div>
+  <div>
+    <h2>Nilai Anda: {{ att.score|num }} dari {{ quiz.max_score|num }}</h2>
+    <p class="muted" style="margin:.4rem 0 0;">Dikirim {{ att.submitted_at|dt }}.</p>
+  </div>
+  {% else %}
+  <div class="stat" style="border:0;padding:0;"><div class="ico amber">{{ icon('clock', 21) }}</div><div><div class="num" style="font-size:1.3rem;">Menunggu penilaian</div><div class="lbl">Soal esai sedang diperiksa dosen. Nilai muncul setelah semua jawaban dinilai.</div></div></div>
+  {% endif %}
+</section>
+{% for qu in questions %}
+{% set ans = answers.get(qu.question_id) %}
+<div class="q-card">
+  <div class="row between"><div class="q-no">Soal {{ loop.index }}</div>
+    {% if ans and ans.score_awarded is not none %}<span class="badge {{ 'badge-ok' if ans.score_awarded >= qu.points else ('badge-bad' if ans.score_awarded == 0 else 'badge-warn') }}">{{ ans.score_awarded|num }} / {{ qu.points|num }} poin</span>{% else %}{{ badge('menunggu') }}{% endif %}</div>
+  <div class="q-text">{{ qu.question_text }}</div>
+  {% if qu.question_type == 'pilihan_ganda' %}
+    {% for o in options.get(qu.question_id, []) %}
+      {% set picked = ans and ans.selected_option_id == o.option_id %}
+      <div class="opt {{ 'right' if o.is_correct else ('wrong' if picked) }}">
+        {{ icon('check-circle' if o.is_correct else ('x-circle' if picked else 'minus'), 18) }}
+        <span>{{ o.option_text }}{% if picked %} <em class="muted">(jawaban Anda)</em>{% endif %}</span>
+      </div>
+    {% endfor %}
+    {% if ans and not ans.selected_option_id %}<p class="muted small">Soal ini tidak dijawab.</p>{% endif %}
+  {% else %}
+    <div class="alert alert-info" style="white-space:pre-wrap;">{{ ans.answer_text if ans and ans.answer_text else '(tidak dijawab)' }}</div>
+  {% endif %}
+</div>
+{% endfor %}
+{% endblock %}

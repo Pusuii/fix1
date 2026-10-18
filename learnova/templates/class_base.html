@@ -1,0 +1,30 @@
+{% extends "app.html" %}
+{% block title %}{{ cls.class_name }} · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="class-hero">
+  <div class="crumbs"><a href="{{ url_for(base + '.classes') }}">Kelas saya</a> {{ icon('chevron-right', 14) }} <span>{{ cls.course_code }}</span></div>
+  <span class="code">{{ cls.course_code }}</span>
+  <h1>{{ cls.class_name }}</h1>
+  <p>{{ cls.course_name }}</p>
+  <div class="row">
+    <span>{{ icon('user', 16) }} {{ cls.lecturer_name }}</span>
+    <span>{{ icon('calendar', 16) }} {{ cls.semester }} {{ cls.academic_year }}</span>
+    <span class="badge">{{ status_info(cls.status)[0] }}</span>
+  </div>
+</div>
+<nav class="tabs" aria-label="Bagian kelas">
+  {% set tabs = [
+    ('ringkasan', 'Ringkasan', 'class_home', None),
+    ('materi', 'Materi', 'materials', counts.materi),
+    ('tugas', 'Tugas', 'assignments', counts.tugas),
+    ('kuis', 'Kuis', 'quizzes', counts.kuis),
+    ('absensi', 'Absensi', 'attendance', None),
+    ('progres', 'Progres & nilai' if base == 'student' else 'Progres mahasiswa', 'progress', None)] %}
+  {% for key, label, ep, count in tabs %}
+  <a class="tab {{ 'active' if tab == key }}" href="{{ url_for(base + '.' + ep, cid=cls.class_id) }}" {% if tab == key %}aria-current="page"{% endif %}>
+    {{ label }}{% if count %}<span class="count">{{ count }}</span>{% endif %}{% if key == 'absensi' and counts.absensi %}<i class="pulse" title="Absensi dibuka"></i>{% endif %}
+  </a>
+  {% endfor %}
+</nav>
+{% block tab %}{% endblock %}
+{% endblock %}

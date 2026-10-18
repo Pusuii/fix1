@@ -1,0 +1,24 @@
+{% extends "class_base.html" %}
+{% from "_macros.html" import progress, empty %}
+{% block tab %}
+<div class="card" style="margin-bottom:1rem;">
+  <div class="row between" style="margin-bottom:.6rem;"><strong>Progres materi</strong><span class="muted small">{{ done }} dari {{ mats|length }} selesai</span></div>
+  {{ progress((done / mats|length * 100) if mats else 0) }}
+</div>
+<div class="card flush">
+  {% if mats %}
+  <div class="list">
+    {% for m in mats %}
+    <a class="list-row" href="{{ url_for('student.material', cid=cls.class_id, mid=m.material_id) }}">
+      <div class="ico {{ 'done' if m.done else ('lock' if m.locked) }}">{{ icon('check' if m.done else ('lock' if m.locked else {'video': 'video', 'slide': 'presentation', 'tautan': 'link'}.get(m.material_type, 'file')), 19) }}</div>
+      <div class="body">
+        <strong>{{ m.sequence_no }}. {{ m.title }}</strong>
+        <span>{{ m.description or '' }}{% if m.locked %} · Selesaikan "{{ m.prereq_title }}" terlebih dahulu{% endif %}</span>
+      </div>
+      {% if m.done %}{{ badge('selesai', 'Selesai') }}{% elif m.locked %}<span class="badge badge-mute">Terkunci</span>{% else %}<span class="badge badge-brand">{{ m.material_type|capitalize }}</span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}{% call empty('book', 'Belum ada materi', 'Dosen belum menambahkan materi di kelas ini.') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

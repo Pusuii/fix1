@@ -1,0 +1,98 @@
+{# Komponen UI yang dipakai ulang #}
+
+{% macro field(label, name, value='', type='text', error=None, hint=None, required=False, placeholder='', extra='', autocomplete=None, minlength=None) -%}
+<div class="field {{ 'has-error' if error }}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span class="muted" aria-hidden="true">*</span>{% endif %}</label>
+  <input class="input" id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ value if value is not none else '' }}"
+    {% if required %}required{% endif %} {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+    {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %} {% if minlength %}minlength="{{ minlength }}"{% endif %} {{ extra|safe }}>
+  {% if hint and not error %}<div class="hint">{{ hint }}</div>{% endif %}
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro textarea(label, name, value='', error=None, hint=None, required=False, rows=5, placeholder='') -%}
+<div class="field {{ 'has-error' if error }}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span class="muted" aria-hidden="true">*</span>{% endif %}</label>
+  <textarea class="textarea" id="f-{{ name }}" name="{{ name }}" rows="{{ rows }}" {% if required %}required{% endif %} {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}>{{ value if value is not none else '' }}</textarea>
+  {% if hint and not error %}<div class="hint">{{ hint }}</div>{% endif %}
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro select(label, name, options, selected=None, error=None, hint=None, required=False, blank=None) -%}
+<div class="field {{ 'has-error' if error }}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span class="muted" aria-hidden="true">*</span>{% endif %}</label>
+  <select class="select" id="f-{{ name }}" name="{{ name }}" {% if required %}required{% endif %}>
+    {% if blank %}<option value="">{{ blank }}</option>{% endif %}
+    {% for val, text in options %}
+      <option value="{{ val }}" {{ 'selected' if selected is not none and val|string == selected|string }}>{{ text }}</option>
+    {% endfor %}
+  </select>
+  {% if hint and not error %}<div class="hint">{{ hint }}</div>{% endif %}
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro empty(ic, title, text='') -%}
+<div class="empty">
+  <div class="ico">{{ icon(ic, 24) }}</div>
+  <h3>{{ title }}</h3>
+  {% if text %}<p>{{ text }}</p>{% endif %}
+  {{ caller() if caller }}
+</div>
+{%- endmacro %}
+
+{% macro progress(value, good=False, label=True) -%}
+{% set v = (value or 0)|round|int %}
+<div class="meter">
+  <div class="progress {{ 'good' if good or v >= 100 }}" role="progressbar" aria-valuenow="{{ v }}" aria-valuemin="0" aria-valuemax="100"><i style="width: {{ [v, 100]|min }}%"></i></div>
+  {% if label %}<b>{{ v }}%</b>{% endif %}
+</div>
+{%- endmacro %}
+
+{% macro stat(ic, number, label, tone='') -%}
+<div class="stat">
+  <div class="ico {{ tone }}">{{ icon(ic, 21) }}</div>
+  <div><div class="num">{{ number }}</div><div class="lbl">{{ label }}</div></div>
+</div>
+{%- endmacro %}
+
+{% macro paging(p) -%}
+{% if p.pages > 1 %}
+<nav class="pager" aria-label="Halaman">
+  {% if p.page > 1 %}<a href="{{ page_url(p.page - 1) }}" aria-label="Sebelumnya">{{ icon('arrow-left', 16) }}</a>{% else %}<span class="off">{{ icon('arrow-left', 16) }}</span>{% endif %}
+  {% for n in range(1, p.pages + 1) %}
+    {% if n == p.page %}<span class="cur" aria-current="page">{{ n }}</span>
+    {% elif n == 1 or n == p.pages or (n - p.page)|abs <= 1 %}<a href="{{ page_url(n) }}">{{ n }}</a>
+    {% elif (n - p.page)|abs == 2 %}<span class="off">…</span>{% endif %}
+  {% endfor %}
+  {% if p.page < p.pages %}<a href="{{ page_url(p.page + 1) }}" aria-label="Berikutnya">{{ icon('arrow-right', 16) }}</a>{% else %}<span class="off">{{ icon('arrow-right', 16) }}</span>{% endif %}
+</nav>
+{% endif %}
+{%- endmacro %}
+
+{% macro deadline(value, done=False) -%}
+{% if done %}<span class="deadline">{{ icon('clock', 15) }} {{ value|dt }}</span>
+{% elif is_past(value) %}<span class="deadline late">{{ icon('clock', 15) }} Lewat {{ value|dt }}</span>
+{% else %}<span class="deadline {{ 'soon' if (value|rel).endswith('lagi') and ('jam' in value|rel or 'menit' in value|rel or 'detik' in value|rel) }}">{{ icon('clock', 15) }} {{ value|dt }} · {{ value|rel }}</span>{% endif %}
+{%- endmacro %}
+
+{% macro confirm_btn(label, action, message, cls='btn sm danger', ic='trash') -%}
+<form class="inline" method="post" action="{{ action }}" data-confirm="{{ message }}">
+  {{ csrf_input() }}
+  <button class="{{ cls }}" type="submit">{{ icon(ic, 15) }} {{ label }}</button>
+</form>
+{%- endmacro %}
+
+{% macro bars(series, tone='', label='Grafik batang 14 hari terakhir') -%}
+{% set mx = series|map(attribute='n')|max %}
+<div class="bars {{ tone }}" role="img" aria-label="{{ label }}">
+  {% for d in series %}
+  <div class="bar" title="{{ d.label }}: {{ d.n }}">
+    <i style="height: calc((100% - 24px) * {{ (d.n / mx) if mx else 0 }})" {% if d.n %}data-n="{{ d.n }}"{% endif %}></i>
+    <span>{{ d.label if loop.index0 % 2 == 0 else '' }}</span>
+  </div>
+  {% endfor %}
+</div>
+{%- endmacro %}

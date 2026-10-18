@@ -1,0 +1,21 @@
+{% extends "app.html" %}
+{% from "_macros.html" import empty, paging %}
+{% block title %}Laporan kendala · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Laporan kendala</h1><p>Laporan dari mahasiswa dan dosen. Tanggapi dan perbarui statusnya sampai selesai.</p></div></div>
+<div class="pill-tabs" style="margin-bottom:1rem;">
+  <a href="{{ url_for('admin.reports') }}" class="{{ 'active' if not status }}">Semua</a>
+  {% for v, l in statuses %}<a href="{{ url_for('admin.reports', status=v) }}" class="{{ 'active' if status == v }}">{{ l }} ({{ counts.get(v, 0) }})</a>{% endfor %}
+</div>
+<div class="card flush">
+  {% if rows %}
+  <div class="list">{% for r in rows %}
+    <a class="list-row" href="{{ url_for('admin.report_detail', rid=r.report_id) }}">
+      <div class="avatar sm">{{ r.full_name|initials }}</div>
+      <div class="body"><strong>{{ r.subject }}</strong><span>{{ r.full_name }} ({{ role_labels[r.role_name] }}) · {{ r.created_at|dt }}{% if r.handler %} · ditangani {{ r.handler }}{% endif %}</span></div>
+      {{ badge(r.status) }}
+    </a>{% endfor %}</div>
+  {{ paging(pager) }}
+  {% else %}{% call empty('flag', 'Tidak ada laporan', 'Laporan dari pengguna akan muncul di sini.') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}

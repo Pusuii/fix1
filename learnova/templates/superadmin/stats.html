@@ -1,0 +1,39 @@
+{% extends "app.html" %}
+{% from "_macros.html" import stat, bars, progress %}
+{% block title %}Statistik · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Statistik</h1><p>Angka keseluruhan platform dan aktivitas 14 hari terakhir.</p></div></div>
+<div class="grid g4">
+  {{ stat('users', counts.students, 'Mahasiswa') }}
+  {{ stat('cap', counts.lecturers, 'Dosen', 'blue') }}
+  {{ stat('book', counts.classes, 'Kelas aktif', 'leaf') }}
+  {{ stat('books', counts.courses, 'Mata kuliah', 'amber') }}
+  {{ stat('file', counts.materials, 'Materi') }}
+  {{ stat('task', counts.assignments, 'Tugas', 'blue') }}
+  {{ stat('upload', counts.submissions, 'Pengumpulan tugas', 'leaf') }}
+  {{ stat('timer', counts.attempts, 'Kuis dikerjakan', 'amber') }}
+</div>
+<div class="grid g2 section">
+  <section class="card"><h3>Login per hari</h3>{{ bars(series.login) }}</section>
+  <section class="card"><h3>Akun baru per hari</h3>{{ bars(series.register, 'leaf') }}</section>
+  <section class="card"><h3>Pengumpulan tugas per hari</h3>{{ bars(series.submission, 'good') }}</section>
+  <section class="card"><h3>Percobaan kuis per hari</h3>{{ bars(series.quiz) }}</section>
+</div>
+<div class="grid g3 section">
+  <section class="card"><h3 style="margin-bottom:.9rem;">Pengguna per peran</h3>
+    {% set total = role_rows|sum(attribute='n') or 1 %}
+    <div class="stack" style="gap:.9rem;">{% for r in role_rows %}<div><div class="row between small" style="margin-bottom:.3rem;"><span>{{ role_labels[r.role_name] }}</span><strong>{{ r.n }}</strong></div>{{ progress(r.n / total * 100, label=False) }}</div>{% endfor %}</div></section>
+  <section class="card"><h3 style="margin-bottom:.9rem;">Status akun</h3>
+    {% set total2 = status_rows|sum(attribute='n') or 1 %}
+    <div class="stack" style="gap:.9rem;">{% for r in status_rows %}<div><div class="row between small" style="margin-bottom:.3rem;"><span>{{ status_info(r.account_status)[0] }}</span><strong>{{ r.n }}</strong></div>{{ progress(r.n / total2 * 100, label=False) }}</div>{% endfor %}</div></section>
+  <section class="card"><h3 style="margin-bottom:.9rem;">Tindakan terbanyak</h3>
+    <div class="stack" style="gap:.5rem;">{% for a in top_actions %}<div class="row between small"><span>{{ label(a.action) }}</span><strong>{{ a.n }}</strong></div>{% else %}<span class="muted">Belum ada data.</span>{% endfor %}</div></section>
+</div>
+<section class="card flush section">
+  <div class="card-head"><h2>Kelas dengan peserta terbanyak</h2></div>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Kelas</th><th>Dosen</th><th>Status</th><th class="num">Peserta</th><th class="num">Materi</th><th class="num">Pengumpulan</th><th class="num">Kuis</th></tr></thead>
+    <tbody>{% for c in class_rows %}<tr><td><strong>{{ c.class_name }}</strong></td><td>{{ c.lecturer }}</td><td>{{ badge(c.status) }}</td><td class="num">{{ c.students }}</td><td class="num">{{ c.materials }}</td><td class="num">{{ c.submissions }}</td><td class="num">{{ c.attempts }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}

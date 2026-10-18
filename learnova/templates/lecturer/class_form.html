@@ -1,0 +1,18 @@
+{% extends "app.html" %}
+{% from "_macros.html" import field, select %}
+{% block title %}{{ 'Ubah kelas' if cls else 'Kelas baru' }} · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="crumbs"><a href="{{ url_for('lecturer.classes') }}">Kelas saya</a> {{ icon('chevron-right', 14) }} <span>{{ 'Ubah kelas' if cls else 'Kelas baru' }}</span></div>
+<div class="page-head"><div><h1>{{ 'Ubah kelas' if cls else 'Kelas baru' }}</h1><p>{% if cls %}Perbarui data kelas atau ubah statusnya.{% else %}Kelas baru langsung dapat menerima mahasiswa bila statusnya aktif.{% endif %}</p></div></div>
+<form class="card" method="post" style="max-width:720px;">
+  {{ csrf_input() }}
+  <div class="form-grid">
+    <div class="full">{{ select('Mata kuliah', 'course_id', courses|map(attribute='course_id')|zip(courses|map(attribute='course_name'))|list, form.course_id, errors.course_id, required=True, blank='Pilih mata kuliah') }}</div>
+    <div class="full">{{ field('Nama kelas', 'class_name', form.class_name, error=errors.class_name, required=True, placeholder='Contoh: Pemrograman Web - Kelas A') }}</div>
+    {{ select('Semester', 'semester', semesters, form.semester, errors.semester, required=True) }}
+    {{ field('Tahun ajaran', 'academic_year', form.academic_year, error=errors.academic_year, required=True, placeholder='2026/2027') }}
+    <div class="full">{{ select('Status', 'status', statuses, form.status, errors.status, hint='Kelas nonaktif atau selesai tidak menerima pengumpulan tugas, kuis, maupun absensi baru.', required=True) }}</div>
+  </div>
+  <div class="form-actions"><button class="btn primary" type="submit">{{ 'Simpan perubahan' if cls else 'Buat kelas' }}</button><a class="btn" href="{{ url_for('lecturer.class_home', cid=cls.class_id) if cls else url_for('lecturer.classes') }}">Batal</a></div>
+</form>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "app.html" %}
+{% from "_macros.html" import empty, paging %}
+{% block title %}Kelas · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Kelas</h1><p>Kelola data kelas, dosen pengampu, status, dan peserta.</p></div>
+  <div class="actions"><a class="btn primary" href="{{ url_for('admin.class_new') }}">{{ icon('plus', 17) }} Kelas baru</a></div></div>
+<form class="filters" method="get">
+  <div class="search-wrap">{{ icon('search', 17) }}<input class="input" type="search" name="q" value="{{ term }}" placeholder="Cari kelas, mata kuliah, atau dosen" aria-label="Cari kelas"></div>
+  <select class="select" name="status" aria-label="Status"><option value="">Semua status</option>{% for v, l in statuses %}<option value="{{ v }}" {{ 'selected' if status == v }}>{{ l }}</option>{% endfor %}</select>
+  <button class="btn" type="submit">{{ icon('filter', 15) }} Terapkan</button>
+  {% if term or status %}<a class="btn ghost" href="{{ url_for('admin.classes') }}">Atur ulang</a>{% endif %}
+</form>
+<div class="card flush">
+  {% if rows %}
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Kelas</th><th>Dosen</th><th>Semester</th><th class="num">Peserta</th><th>Status</th><th></th></tr></thead>
+    <tbody>{% for c in rows %}<tr>
+      <td><a href="{{ url_for('admin.class_detail', cid=c.class_id) }}"><strong>{{ c.class_name }}</strong></a><div class="muted small">{{ c.course_code }} · {{ c.course_name }}</div></td>
+      <td>{{ c.lecturer_name }}</td><td>{{ c.semester }} {{ c.academic_year }}</td><td class="num">{{ c.students }}</td><td>{{ badge(c.status) }}</td>
+      <td class="actions"><a class="btn sm" href="{{ url_for('admin.class_detail', cid=c.class_id) }}">Kelola</a></td></tr>{% endfor %}</tbody>
+  </table></div>
+  {{ paging(pager) }}
+  {% else %}{% call empty('book', 'Tidak ada kelas yang cocok') %}{% endcall %}{% endif %}
+</div>
+{% endblock %}
